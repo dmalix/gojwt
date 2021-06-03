@@ -5,57 +5,83 @@ import (
 	"time"
 )
 
-func TestToken_success_secretBoxPlainText(t *testing.T) {
+func TestJWT_SUCCESS(t *testing.T) {
 
-	var err error
-	var token string
+	const id = "id1"
+	const dataset = "dataset1"
 
-	jwtManager := NewJwt(Config{
-		SecretKey:              "secretKey",
-		SigningAlgorithm:       ParamSigningAlgorithmHS256,
-		Issuer:                 "issuer",
-		Subject:                "subject",
-		AccessTokenLifetimeSec: 100})
-
-	token, err = jwtManager.Create("sessionID", []byte("userData"), ParamPurposeAccess)
-
+	jwtAccess, err := NewJWT(Config{
+		Headers: Headers{
+			Type:                    TokenType,
+			SignatureAlgorithm:      TokenSignatureAlgorithmHS512,
+		},
+		Claims: Claims{
+			Issuer:         "tester1",
+			Subject:        TokenUseAccess,
+		},
+		ParseOptions: ParseOptions{},
+		TokenLifetimeSec: 100,
+		Key:              "secret1",
+	})
 	if err != nil {
-		t.Errorf("function returned wrong error value: got %v want %v",
-			err, nil)
+		t.Errorf("the function returned the error: %s", err)
 	}
 
-	_, err = jwtManager.Validate(token)
-
+	jwt, err := jwtAccess.Create(Claims{
+		JwtId: id,
+		Data: []byte(dataset),
+	})
 	if err != nil {
-		t.Errorf("function returned wrong error value: got %v want %v",
-			err, nil)
+		t.Errorf("the function returned the error: %s", err)
+	}
+
+	token, codeError, err := jwtAccess.Parse(jwt)
+	if err != nil {
+		t.Errorf("the function returned wrong error value: got '%v:%v' want '%v'", codeError, err, nil)
+	}
+	if token.Headers.Type != TokenType {
+		t.Errorf("the function returned wrong error value: got '%v' want '%v'", token.Headers.Type, TokenType)
+	}
+	if token.Claims.JwtId != id {
+		t.Errorf("the function returned wrong error value: got '%v' want '%v'", token.Claims.JwtId, id)
+	}
+	if string(token.Claims.Data) != dataset {
+		t.Errorf("the function returned wrong error value: got '%v' want '%v'", string(token.Claims.Data), dataset)
 	}
 }
 
-func TestToken_invalid(t *testing.T) {
+func TestJWT_FAIL(t *testing.T) {
 
-	var err error
-	var token string
-
-	jwtManager := NewJwt(Config{
-		SecretKey:        "secretKey",
-		SigningAlgorithm: ParamSigningAlgorithmHS256,
-		Issuer:           "issuer",
-		Subject:          "subject"})
-
-	token, err = jwtManager.Create("sessionID", []byte("data"), ParamPurposeAccess)
-
+	jwtRefresh, err := NewJWT(Config{
+		Headers: Headers{
+			Type:                    TokenType,
+			SignatureAlgorithm:      TokenSignatureAlgorithmHS256,
+		},
+		Claims: Claims{
+			Issuer:         "tester2",
+			Subject:        TokenUseRefresh,
+		},
+		ParseOptions: ParseOptions{},
+		TokenLifetimeSec: 1,
+		Key:              "secret2",
+	})
 	if err != nil {
-		t.Errorf("function returned wrong error value: got %v want %v",
-			err, nil)
+		t.Errorf("the function returned the error: %s", err)
 	}
 
-	time.Sleep(1 * time.Second)
+	jwt, err := jwtRefresh.Create(Claims{
+		JwtId: "id2",
+		Data: []byte("dataset2"),
+	})
+	if err != nil {
+		t.Errorf("the function returned the error: %s", err)
+	}
 
-	_, err = jwtManager.Validate(token)
+	time.Sleep(2 * time.Second)
 
-	if err == nil {
-		t.Errorf("function returned wrong error value: got %v want %v",
-			err, "!nil")
+	_, codeError, err := jwtRefresh.Parse(jwt)
+	if err == nil && codeError != ValidationErrorClaimsExpired {
+		t.Errorf("the function returned wrong error value: got '%v' want '%v: %v'",
+			err, errTokenIsInvalid, ValidationErrorClaimsExpired)
 	}
 }

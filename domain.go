@@ -1,6 +1,10 @@
 package jwt
 
 type Jwt interface {
-	Create(sessionID string, privateBox []byte, tokenPurpose string, issuedAt ...int64) (string, error)
-	Validate(jwt string) (Token, error)
+	Create(claims Claims, headers ...Headers) (string, error)
+	Parse(jwt string, parseOptions ...ParseOptions) (Token, string, error)
+
+	GetHeaders()Headers
+	GetClaims()Claims
+	GetParseOptions()ParseOptions
 }
