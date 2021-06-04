@@ -8,25 +8,25 @@ import (
 	"time"
 )
 
-func (t *jwt) Parse(jwt string, parseOptions ...ParseOptions) (Token, string, error) {
+func (t *jwt) Parse(jwt string, p ...ParseOptions) (Token, string, error) {
 
 	const NoPadding rune = -1
 	var token Token
 	var now = time.Now().UTC().Unix()
-	var options ParseOptions
+	var parseOptions ParseOptions
 
 	// Init Parse Options
-	if len(parseOptions) != 0 {
-		options = parseOptions[0]
+	if len(p) != 0 {
+		parseOptions = p[0]
 	} else {
-		options = t.config.ParseOptions
+		parseOptions = t.config.ParseOptions
 	}
 
 	// Split Token values
 	jwtParts := strings.Split(jwt, ".")
 	if len(jwtParts) != 3 {
 		return Token{}, ValidationErrorMalformed,
-		fmt.Errorf( "%s: failed to split the token values", ValidationErrorMalformed)
+			fmt.Errorf("%s: failed to split the token values", ValidationErrorMalformed)
 	}
 
 	// Parse Headers
@@ -53,7 +53,7 @@ func (t *jwt) Parse(jwt string, parseOptions ...ParseOptions) (Token, string, er
 	token.Signature = jwtParts[2]
 
 	// Validate Signature
-	if options.Claims.SkipSignatureValidation == false {
+	if parseOptions.SkipSignatureValidation == false {
 		jwtSample, err := t.Create(token.Claims, token.Headers)
 		if err != nil {
 			return Token{}, ValidationErrorUnverifiable, err
@@ -66,33 +66,33 @@ func (t *jwt) Parse(jwt string, parseOptions ...ParseOptions) (Token, string, er
 	}
 
 	// Validate Headers
-	if options.Headers.RequiredContentType && token.Headers.ContentType == "" {
+	if parseOptions.RequiredHeaderContentType && token.Headers.ContentType == "" {
 		return Token{}, ValidationErrorHeadersContentType, errTokenIsInvalid
 	}
-	if options.Headers.RequiredKeyID && token.Headers.KeyID == "" {
+	if parseOptions.RequiredHeaderKeyID && token.Headers.KeyID == "" {
 		return Token{}, ValidationErrorHeadersKeyID, errTokenIsInvalid
 	}
-	if options.Headers.RequiredCritical && token.Headers.Critical == "" {
+	if parseOptions.RequiredHeaderCritical && token.Headers.Critical == "" {
 		return Token{}, ValidationErrorHeadersCritical, errTokenIsInvalid
 	}
 
 	// Validate Claims
-	if options.Claims.RequiredIssuer && token.Claims.Issuer == "" {
+	if parseOptions.RequiredClaimIssuer && token.Claims.Issuer == "" {
 		return Token{}, ValidationErrorClaimsIssuer, errTokenIsInvalid
 	}
-	if options.Claims.RequiredSubject && token.Claims.Subject == "" {
+	if parseOptions.RequiredClaimSubject && token.Claims.Subject == "" {
 		return Token{}, ValidationErrorClaimsSubject, errTokenIsInvalid
 	}
-	if options.Claims.RequiredAudience && token.Claims.Audience == "" {
+	if parseOptions.RequiredClaimAudience && token.Claims.Audience == "" {
 		return Token{}, ValidationErrorClaimsAudience, errTokenIsInvalid
 	}
-	if options.Claims.RequiredJwtId && token.Claims.JwtId == "" {
+	if parseOptions.RequiredClaimJwtID && token.Claims.JwtID == "" {
 		return Token{}, ValidationErrorClaimsJwtId, errTokenIsInvalid
 	}
-	if options.Claims.RequiredData && token.Claims.Data == nil {
+	if parseOptions.RequiredClaimData && token.Claims.Data == nil {
 		return Token{}, ValidationErrorClaimsData, errTokenIsInvalid
 	}
-	if options.Claims.SkipClaimsValidation == false {
+	if parseOptions.SkipClaimsValidation == false {
 		// Validate ExpirationTime value
 		if now > time.Unix(token.Claims.IssuedAt, 0).Add(time.Second*time.Duration(t.config.TokenLifetimeSec)).UTC().Unix() {
 			return Token{}, ValidationErrorClaimsExpired, errTokenIsInvalid

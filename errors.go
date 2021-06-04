@@ -9,9 +9,9 @@ const (
 	ValidationErrorUnverifiable     = "the token could not be verified due to problems with the generation of the test sample"
 	ValidationErrorSignatureInvalid = "signature validation failed"
 
-	ValidationErrorHeadersContentType             = "header 'cty' validation failed"
-	ValidationErrorHeadersKeyID                   = "header 'kid' validation failed"
-	ValidationErrorHeadersCritical                = "header 'crit' validation failed"
+	ValidationErrorHeadersContentType = "header 'cty' validation failed"
+	ValidationErrorHeadersKeyID       = "header 'kid' validation failed"
+	ValidationErrorHeadersCritical    = "header 'crit' validation failed"
 
 	ValidationErrorClaimsIssuer      = "claim 'iss' validation failed"
 	ValidationErrorClaimsSubject     = "claim 'sub' validation failed"
@@ -20,6 +20,7 @@ const (
 	ValidationErrorClaimsNotValidYet = "claim 'nbf' validation failed"
 	ValidationErrorClaimsIssuedAt    = "claim 'iat' validation failed"
 	ValidationErrorClaimsJwtId       = "claim 'jti' validation failed"
+	ValidationErrorClaimsSessionID   = "claim 'sessionID' validation failed"
 	ValidationErrorClaimsData        = "claim 'data' validation failed"
 )
 

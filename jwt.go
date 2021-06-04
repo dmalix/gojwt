@@ -14,7 +14,7 @@ type Config struct {
 	Headers          Headers
 	Claims           Claims
 	ParseOptions     ParseOptions
-	TokenLifetimeSec int64
+	TokenLifetimeSec int
 	Key              string
 }
 
@@ -22,7 +22,7 @@ type jwt struct {
 	config Config
 }
 
-func NewJWT(
+func NewToken(
 	config Config) (*jwt, error) {
 	if config.Key == "" {
 		return &jwt{}, fmt.Errorf("param config.Key is required")
