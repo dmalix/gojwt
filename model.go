@@ -7,11 +7,11 @@ type Token struct {
 }
 
 type Headers struct {
-	Type                    string `json:"typ,omitempty"`
-	SignatureAlgorithm      string `json:"alg,omitempty"`
-	ContentType             string `json:"cty,omitempty"`
-	KeyID                   string `json:"kid,omitempty"`
-	Critical                string `json:"crit,omitempty"`
+	Type               string `json:"typ,omitempty"`
+	SignatureAlgorithm string `json:"alg,omitempty"`
+	ContentType        string `json:"cty,omitempty"`
+	KeyID              string `json:"kid,omitempty"`
+	Critical           string `json:"crit,omitempty"`
 }
 
 type Claims struct {
@@ -26,21 +26,24 @@ type Claims struct {
 }
 
 type ParseOptions struct {
-	Claims struct {
-		RequiredIssuer          bool
-		RequiredSubject         bool
-		RequiredAudience        bool
-		RequiredJwtId           bool
-		RequiredData            bool
-		SkipSignatureValidation bool
-		SkipClaimsValidation    bool
-	}
-	Headers struct {
-		RequiredContentType             bool
-		RequiredKeyID                   bool
-		RequiredX509CertificateChain    bool
-		RequiredX509CertificateChainURL bool
-		RequiredCritical                bool
-	}
+	Claims  ClaimsParseOptions
+	Headers HeadersParseOptions
 }
 
+type ClaimsParseOptions struct {
+	RequiredIssuer          bool
+	RequiredSubject         bool
+	RequiredAudience        bool
+	RequiredJwtId           bool
+	RequiredData            bool
+	SkipSignatureValidation bool
+	SkipClaimsValidation    bool
+}
+
+type HeadersParseOptions struct {
+	RequiredContentType             bool
+	RequiredKeyID                   bool
+	RequiredX509CertificateChain    bool
+	RequiredX509CertificateChainURL bool
+	RequiredCritical                bool
+}
