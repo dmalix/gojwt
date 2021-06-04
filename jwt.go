@@ -1,29 +1,33 @@
 package jwt
 
+import "fmt"
+
+const (
+	TokenType                    = "JWT"
+	TokenUseAccess               = "Access"
+	TokenUseRefresh              = "Refresh"
+	TokenSignatureAlgorithmHS256 = "HS256"
+	TokenSignatureAlgorithmHS512 = "HS512"
+)
+
 type Config struct {
-	SecretKey               string
-	SigningAlgorithm        string
-	Issuer                  string
-	Subject                 string
-	AccessTokenLifetimeSec  int
-	RefreshTokenLifetimeSec int
+	Headers          Headers
+	Claims           Claims
+	ParseOptions     ParseOptions
+	TokenLifetimeSec int64
+	Key              string
 }
 
 type jwt struct {
 	config Config
 }
 
-func NewJwt(
-	config Config) *jwt {
+func NewJWT(
+	config Config) (*jwt, error) {
+	if config.Key == "" {
+		return &jwt{}, fmt.Errorf("param config.Key is required")
+	}
 	return &jwt{
 		config: config,
-	}
+	}, nil
 }
-
-const (
-	ParamTypeJWT               = "JWT"
-	ParamPurposeAccess         = "access"
-	ParamPurposeRefresh        = "refresh"
-	ParamSigningAlgorithmHS256 = "HS256"
-	ParamSigningAlgorithmHS512 = "HS512"
-)
