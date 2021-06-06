@@ -1,6 +1,7 @@
 package jwt
 
 type MockDescription struct {
+	Props    struct{}
 	Expected struct {
 		Error error
 	}
