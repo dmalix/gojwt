@@ -10,16 +10,16 @@ func TestJWT_SUCCESS(t *testing.T) {
 	const id = "id1"
 	const dataset = "dataset1"
 
-	jwtAccess, err := NewJWT(Config{
+	jwtAccess, err := NewToken(Config{
 		Headers: Headers{
-			Type:                    TokenType,
-			SignatureAlgorithm:      TokenSignatureAlgorithmHS512,
+			Type:               TokenType,
+			SignatureAlgorithm: TokenSignatureAlgorithmHS512,
 		},
 		Claims: Claims{
-			Issuer:         "tester1",
-			Subject:        TokenUseAccess,
+			Issuer:  "tester1",
+			Subject: TokenUseAccess,
 		},
-		ParseOptions: ParseOptions{},
+		ParseOptions:     ParseOptions{},
 		TokenLifetimeSec: 100,
 		Key:              "secret1",
 	})
@@ -28,8 +28,8 @@ func TestJWT_SUCCESS(t *testing.T) {
 	}
 
 	jwt, err := jwtAccess.Create(Claims{
-		JwtId: id,
-		Data: []byte(dataset),
+		JwtID: id,
+		Data:  []byte(dataset),
 	})
 	if err != nil {
 		t.Errorf("the function returned the error: %s", err)
@@ -42,8 +42,8 @@ func TestJWT_SUCCESS(t *testing.T) {
 	if token.Headers.Type != TokenType {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v'", token.Headers.Type, TokenType)
 	}
-	if token.Claims.JwtId != id {
-		t.Errorf("the function returned wrong error value: got '%v' want '%v'", token.Claims.JwtId, id)
+	if token.Claims.JwtID != id {
+		t.Errorf("the function returned wrong error value: got '%v' want '%v'", token.Claims.JwtID, id)
 	}
 	if string(token.Claims.Data) != dataset {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v'", string(token.Claims.Data), dataset)
@@ -52,16 +52,16 @@ func TestJWT_SUCCESS(t *testing.T) {
 
 func TestJWT_FAIL(t *testing.T) {
 
-	jwtRefresh, err := NewJWT(Config{
+	jwtRefresh, err := NewToken(Config{
 		Headers: Headers{
-			Type:                    TokenType,
-			SignatureAlgorithm:      TokenSignatureAlgorithmHS256,
+			Type:               TokenType,
+			SignatureAlgorithm: TokenSignatureAlgorithmHS256,
 		},
 		Claims: Claims{
-			Issuer:         "tester2",
-			Subject:        TokenUseRefresh,
+			Issuer:  "tester2",
+			Subject: TokenUseRefresh,
 		},
-		ParseOptions: ParseOptions{},
+		ParseOptions:     ParseOptions{},
 		TokenLifetimeSec: 1,
 		Key:              "secret2",
 	})
@@ -70,8 +70,8 @@ func TestJWT_FAIL(t *testing.T) {
 	}
 
 	jwt, err := jwtRefresh.Create(Claims{
-		JwtId: "id2",
-		Data: []byte("dataset2"),
+		JwtID: "id2",
+		Data:  []byte("dataset2"),
 	})
 	if err != nil {
 		t.Errorf("the function returned the error: %s", err)

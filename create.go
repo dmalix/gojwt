@@ -63,8 +63,8 @@ func (t *jwt) Create(claims Claims, h ...Headers) (string, error) {
 	if claims.IssuedAt == 0 {
 		claims.IssuedAt = t.config.Claims.IssuedAt
 	}
-	if claims.JwtId == "" {
-		claims.JwtId = t.config.Claims.JwtId
+	if claims.JwtID == "" {
+		claims.JwtID = t.config.Claims.JwtID
 	}
 	if claims.Data == nil {
 		claims.Data = t.config.Claims.Data
