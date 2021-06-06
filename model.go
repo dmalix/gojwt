@@ -35,7 +35,6 @@ type ParseOptions struct {
 	RequiredClaimSubject                  bool
 	RequiredClaimAudience                 bool
 	RequiredClaimJwtID                    bool
-	RequiredClaimSessionID                bool
 	RequiredClaimData                     bool
 	SkipClaimsValidation                  bool
 	SkipSignatureValidation               bool
