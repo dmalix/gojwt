@@ -26,3 +26,4 @@ func (s *MockDescription) GetClaims() Claims {
 func (s *MockDescription) GetParseOptions() ParseOptions {
 	return ParseOptions{}
 }
+

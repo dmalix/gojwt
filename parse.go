@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (t *jwt) Parse(jwt string, p ...ParseOptions) (Token, string, error) {
+func (t *jwt) Parse(jwt string, options ...ParseOptions) (Token, string, error) {
 
 	const NoPadding rune = -1
 	var token Token
@@ -16,8 +16,8 @@ func (t *jwt) Parse(jwt string, p ...ParseOptions) (Token, string, error) {
 	var parseOptions ParseOptions
 
 	// Init Parse Options
-	if len(p) != 0 {
-		parseOptions = p[0]
+	if len(options) != 0 {
+		parseOptions = options[0]
 	} else {
 		parseOptions = t.config.ParseOptions
 	}
