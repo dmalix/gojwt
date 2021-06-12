@@ -54,14 +54,23 @@ func (t *jwt) Parse(jwt string, options ...ParseOptions) (Token, string, error) 
 
 	// Validate Signature
 	if parseOptions.SkipSignatureValidation == false {
-		jwtSample, err := t.Create(token.Claims, token.Headers)
+		headersPart, err := makeHeaderPart(token.Headers)
 		if err != nil {
-			return Token{}, ValidationErrorUnverifiable, err
+			return Token{}, ValidationErrorUnverifiable, fmt.Errorf("failed to make the headersPart: %s", err)
 		}
-		if strings.Split(jwtSample, ".")[2] != token.Signature {
+		claimsPart, err := makeClaimsPart(token.Claims)
+		if err != nil {
+			return Token{}, ValidationErrorUnverifiable, fmt.Errorf("failed to make the claimsPart: %s", err)
+		}
+		unsignedToken := headersPart + "." + claimsPart
+		signature, err := makeSignature(unsignedToken, token.Headers.SignatureAlgorithm, t.config.Key)
+		if err != nil {
+			return Token{}, ValidationErrorUnverifiable, fmt.Errorf("failed to make the signature: %s", err)
+		}
+		if signature != token.Signature {
 			return Token{}, ValidationErrorSignatureInvalid,
-				fmt.Errorf("failed to validate signature: sample %s, token %s",
-					strings.Split(jwtSample, ".")[2], token.Signature)
+				fmt.Errorf("failed to validate signature: jwtSample %s, jwt %s",
+					headersPart + "." + claimsPart + "." + signature, jwt)
 		}
 	}
 
@@ -94,7 +103,7 @@ func (t *jwt) Parse(jwt string, options ...ParseOptions) (Token, string, error) 
 	}
 	if parseOptions.SkipClaimsValidation == false {
 		// Validate ExpirationTime value
-		if now > time.Unix(token.Claims.IssuedAt, 0).Add(time.Second*time.Duration(t.config.TokenLifetimeSec)).UTC().Unix() {
+		if now > time.Unix(token.Claims.ExpirationTime, 0).UTC().Unix() {
 			return Token{}, ValidationErrorClaimsExpired, errTokenIsInvalid
 		}
 		// Validate NotBefore value

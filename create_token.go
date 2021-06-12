@@ -1,22 +1,12 @@
 package jwt
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"crypto/sha512"
-	"encoding/base64"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"hash"
 	"html"
 	"time"
 )
 
 func (t *jwt) Create(claims Claims, h ...Headers) (string, error) {
-
-	const noPadding rune = -1
-	var mac hash.Hash
 
 	// Init Headers
 	headers := t.config.Headers
@@ -71,11 +61,10 @@ func (t *jwt) Create(claims Claims, h ...Headers) (string, error) {
 	}
 
 	// Headers part
-	valueByte, err := json.Marshal(headers)
+	headersPart, err := makeHeaderPart(headers)
 	if err != nil {
-		return "", fmt.Errorf("failed convert the headers to JSON-format: %s", err)
+		return "", fmt.Errorf("failed to make the headersPart: %s", err)
 	}
-	headersPart := base64.URLEncoding.WithPadding(noPadding).EncodeToString(valueByte)
 
 	// Payload part
 	now := time.Now().UTC().Unix()
@@ -94,27 +83,20 @@ func (t *jwt) Create(claims Claims, h ...Headers) (string, error) {
 		claims.ExpirationTime =
 			time.Unix(now, 0).Add(time.Second * time.Duration(t.config.TokenLifetimeSec)).UTC().Unix()
 	}
-	valueByte, err = json.Marshal(claims)
+	claimsPart, err := makeClaimsPart(claims)
 	if err != nil {
-		return "", fmt.Errorf("failed convert the token.Claims to JSON-format: %s", err)
+		return "", fmt.Errorf("failed to make the claimsPart: %s", err)
 	}
-	payloadPart := base64.URLEncoding.WithPadding(noPadding).EncodeToString(valueByte)
 
-	// Signature part
-	unsignedToken := headersPart + "." + payloadPart
-	switch headers.SignatureAlgorithm {
-	case TokenSignatureAlgorithmHS256:
-		mac = hmac.New(sha256.New, []byte(t.config.Key))
-	case TokenSignatureAlgorithmHS512:
-		mac = hmac.New(sha512.New, []byte(t.config.Key))
-	default:
-		return "", fmt.Errorf("invalid the signature algorithm: %s", headers.SignatureAlgorithm)
+	// Signature
+	unsignedToken := headersPart + "." + claimsPart
+	signature, err := makeSignature(unsignedToken, headers.SignatureAlgorithm, t.config.Key)
+	if err != nil {
+		return "", fmt.Errorf("failed to make the signature: %s", err)
 	}
-	mac.Write([]byte(unsignedToken))
-	signature := hex.EncodeToString(mac.Sum(nil))
 
 	// Return the JSON Web Token (JWT).
 	return html.UnescapeString(headersPart) +
-		"." + html.UnescapeString(payloadPart) +
+		"." + html.UnescapeString(claimsPart) +
 		"." + html.UnescapeString(signature), nil
 }
