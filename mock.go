@@ -1,29 +1,44 @@
 package jwt
 
 type MockDescription struct {
-	Props    struct{}
 	Expected struct {
-		Error error
+		Create struct {
+			JWT string
+			Error        error
+		}
+		Parse struct {
+			Token Token
+			Error        error
+		}
+		GetHeaders struct {
+			Headers Headers
+		}
+		GetClaims struct {
+			Claims Claims
+		}
+		GetParseOptions struct {
+			ParseOptions ParseOptions
+		}
 	}
 }
 
-var MockData MockDescription
+var Mock MockDescription
 
 func (s *MockDescription) Create(_ Claims, _ ...Headers) (string, error) {
-	return "", MockData.Expected.Error
+	return Mock.Expected.Create.JWT, Mock.Expected.Create.Error
 }
 
 func (s *MockDescription) Parse(_ string, _ ...ParseOptions) (Token, string, error) {
-	return Token{}, "", MockData.Expected.Error
+	return Mock.Expected.Parse.Token, "", Mock.Expected.Parse.Error
 }
 
 func (s *MockDescription) GetHeaders() Headers {
-	return Headers{}
+	return Mock.Expected.GetHeaders.Headers
 }
 func (s *MockDescription) GetClaims() Claims {
-	return Claims{}
+	return Mock.Expected.GetClaims.Claims
 }
 func (s *MockDescription) GetParseOptions() ParseOptions {
-	return ParseOptions{}
+	return Mock.Expected.GetParseOptions.ParseOptions
 }
 
