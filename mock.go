@@ -3,8 +3,8 @@ package jwt
 type MockDescription struct {
 	Expected struct {
 		Create struct {
-			JWT string
-			Error        error
+			Jwt   string
+			Error error
 		}
 		Parse struct {
 			Token Token
@@ -25,7 +25,7 @@ type MockDescription struct {
 var Mock MockDescription
 
 func (s *MockDescription) Create(_ Claims, _ ...Headers) (string, error) {
-	return Mock.Expected.Create.JWT, Mock.Expected.Create.Error
+	return Mock.Expected.Create.Jwt, Mock.Expected.Create.Error
 }
 
 func (s *MockDescription) Parse(_ string, _ ...ParseOptions) (Token, string, error) {

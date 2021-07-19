@@ -21,7 +21,7 @@ func TestMakeSignature__SUCCESS(t *testing.T) {
 	}
 }
 
-func TestJWT_SUCCESS(t *testing.T) {
+func TestJwt_SUCCESS(t *testing.T) {
 
 	const id = "id"
 	const dataset = "dataset"
@@ -68,7 +68,7 @@ func TestJWT_SUCCESS(t *testing.T) {
 
 
 
-func TestJWT_FAIL(t *testing.T) {
+func TestJwt_FAIL(t *testing.T) {
 
 	jwtRefresh, err := NewToken(Config{
 		Headers: Headers{
@@ -105,7 +105,7 @@ func TestJWT_FAIL(t *testing.T) {
 }
 
 
-func TestJWTParse_SUCCESS(t *testing.T) {
+func TestJwtParse_SUCCESS(t *testing.T) {
 
 	const jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ0ZXN0ZXIyIiwic3ViIjoiQWNjZXNzIiwiZXhwIjoyNjIzNTAzMzQ0LCJpYXQiOjE2MjM1MDMzNDMsImp0aSI6ImlkMiIsImRhdGEiOiJaR0YwWVhObGREST0ifQ.ilnH-Xqkf0EdgndVpCplOkTcTDeQLMZ5ivcmfzkq_fA"
 
@@ -123,7 +123,7 @@ func TestJWTParse_SUCCESS(t *testing.T) {
 	}
 }
 
-func TestJWTParse_FAIL1(t *testing.T) {
+func TestJwtParse_FAIL1(t *testing.T) {
 
 	const jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ0ZXN0ZXIyIiwic3ViIjoiQWNjZXNzIiwiZXhwIjoyNjIzNTAzMzQ0LCJpYXQiOjE2MjM1MDMzNDMsImp0aSI6ImlkMiIsImRhdGEiOiJaR0YwWVhObGREST0ifQ.ilnH-Xqkf0EdgndVpCplOkTcTDeQLMZ5ivcmfzkq_fA"
 
@@ -141,7 +141,7 @@ func TestJWTParse_FAIL1(t *testing.T) {
 	}
 }
 
-func TestJWTParse_FAIL2(t *testing.T) {
+func TestJwtParse_FAIL2(t *testing.T) {
 
 	const jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ0ZXN0ZXIiLCJzdWIiOiJBY2Nlc3MiLCJleHAiOjE2MjM1MDM0NDMsImlhdCI6MTYyMzUwMzM0MywianRpIjoiaWQiLCJkYXRhIjoiWkdGMFlYTmxkREk9In0.1uslqn4e1Id3y84B_6zOBsA_E8a-9tXKnwXk2Wje14s"
 
