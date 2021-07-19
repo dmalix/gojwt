@@ -10,7 +10,7 @@ type Headers struct {
 	Type               string `json:"typ,omitempty"`
 	SignatureAlgorithm string `json:"alg,omitempty"`
 	ContentType        string `json:"cty,omitempty"`
-	KeyID              string `json:"kid,omitempty"`
+	KeyId              string `json:"kid,omitempty"`
 	Critical           string `json:"crit,omitempty"`
 }
 
@@ -21,20 +21,20 @@ type Claims struct {
 	ExpirationTime int64  `json:"exp,omitempty"`
 	NotBefore      int64  `json:"nbf,omitempty"`
 	IssuedAt       int64  `json:"iat,omitempty"`
-	JwtID          string `json:"jti,omitempty"`
+	JwtId          string `json:"jti,omitempty"`
 	Data           []byte `json:"data,omitempty"` // It is a custom field for any data (for example, encrypted data).
 }
 
 type ParseOptions struct {
 	RequiredHeaderContentType             bool
-	RequiredHeaderKeyID                   bool
+	RequiredHeaderKeyId                   bool
 	RequiredHeaderX509CertificateChain    bool
 	RequiredHeaderX509CertificateChainURL bool
 	RequiredHeaderCritical                bool
 	RequiredClaimIssuer                   bool
 	RequiredClaimSubject                  bool
 	RequiredClaimAudience                 bool
-	RequiredClaimJwtID                    bool
+	RequiredClaimJwtId                    bool
 	RequiredClaimData                     bool
 	SkipClaimsValidation                  bool
 	SkipSignatureValidation               bool

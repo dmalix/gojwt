@@ -78,8 +78,8 @@ func (t *jwt) Parse(jwt string, options ...ParseOptions) (Token, string, error) 
 	if parseOptions.RequiredHeaderContentType && token.Headers.ContentType == "" {
 		return Token{}, ValidationErrorHeadersContentType, errTokenIsInvalid
 	}
-	if parseOptions.RequiredHeaderKeyID && token.Headers.KeyID == "" {
-		return Token{}, ValidationErrorHeadersKeyID, errTokenIsInvalid
+	if parseOptions.RequiredHeaderKeyId && token.Headers.KeyId == "" {
+		return Token{}, ValidationErrorHeadersKeyId, errTokenIsInvalid
 	}
 	if parseOptions.RequiredHeaderCritical && token.Headers.Critical == "" {
 		return Token{}, ValidationErrorHeadersCritical, errTokenIsInvalid
@@ -95,7 +95,7 @@ func (t *jwt) Parse(jwt string, options ...ParseOptions) (Token, string, error) 
 	if parseOptions.RequiredClaimAudience && token.Claims.Audience == "" {
 		return Token{}, ValidationErrorClaimsAudience, errTokenIsInvalid
 	}
-	if parseOptions.RequiredClaimJwtID && token.Claims.JwtID == "" {
+	if parseOptions.RequiredClaimJwtId && token.Claims.JwtId == "" {
 		return Token{}, ValidationErrorClaimsJwtId, errTokenIsInvalid
 	}
 	if parseOptions.RequiredClaimData && token.Claims.Data == nil {

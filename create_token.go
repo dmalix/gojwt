@@ -20,8 +20,8 @@ func (t *jwt) Create(claims Claims, h ...Headers) (string, error) {
 		if h[0].ContentType != "" {
 			headers.ContentType = h[0].ContentType
 		}
-		if h[0].KeyID != "" {
-			headers.KeyID = h[0].KeyID
+		if h[0].KeyId != "" {
+			headers.KeyId = h[0].KeyId
 		}
 		if h[0].Critical != "" {
 			headers.Critical = h[0].Critical
@@ -53,8 +53,8 @@ func (t *jwt) Create(claims Claims, h ...Headers) (string, error) {
 	if claims.IssuedAt == 0 {
 		claims.IssuedAt = t.config.Claims.IssuedAt
 	}
-	if claims.JwtID == "" {
-		claims.JwtID = t.config.Claims.JwtID
+	if claims.JwtId == "" {
+		claims.JwtId = t.config.Claims.JwtId
 	}
 	if claims.Data == nil {
 		claims.Data = t.config.Claims.Data

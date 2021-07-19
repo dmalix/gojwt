@@ -44,7 +44,7 @@ func TestJWT_SUCCESS(t *testing.T) {
 	}
 
 	jwt, err := jwtAccess.Create(Claims{
-		JwtID: id,
+		JwtId: id,
 		Data:  []byte(dataset),
 	})
 	if err != nil {
@@ -58,8 +58,8 @@ func TestJWT_SUCCESS(t *testing.T) {
 	if token.Headers.Type != TokenType {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v'", token.Headers.Type, TokenType)
 	}
-	if token.Claims.JwtID != id {
-		t.Errorf("the function returned wrong error value: got '%v' want '%v'", token.Claims.JwtID, id)
+	if token.Claims.JwtId != id {
+		t.Errorf("the function returned wrong error value: got '%v' want '%v'", token.Claims.JwtId, id)
 	}
 	if string(token.Claims.Data) != dataset {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v'", string(token.Claims.Data), dataset)
@@ -88,7 +88,7 @@ func TestJWT_FAIL(t *testing.T) {
 	}
 
 	jwt, err := jwtRefresh.Create(Claims{
-		JwtID: "id",
+		JwtId: "id",
 		Data:  []byte("dataset"),
 	})
 	if err != nil {
