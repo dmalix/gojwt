@@ -79,7 +79,15 @@ func TestJwt_FAIL(t *testing.T) {
 			Issuer:  "tester",
 			Subject: TokenUseRefresh,
 		},
-		ParseOptions:     ParseOptions{},
+		ParseOptions:     ParseOptions{
+			RequiredHeaderContentType:             true,
+			RequiredClaimIssuer:                   true,
+			RequiredClaimSubject:                  true,
+			RequiredClaimJwtId:                    true,
+			RequiredClaimData:                     true,
+			SkipClaimsValidation:                  true,
+			SkipSignatureValidation:               true,
+		},
 		TokenLifetimeSec: 1,
 		Key:              "secret",
 	})
