@@ -8,7 +8,7 @@ type MockDescription struct {
 		}
 		Parse struct {
 			Token Token
-			Error        error
+			Error error
 		}
 		GetHeaders struct {
 			Headers Headers
@@ -41,4 +41,3 @@ func (s *MockDescription) GetClaims() Claims {
 func (s *MockDescription) GetParseOptions() ParseOptions {
 	return Mock.Expected.GetParseOptions.ParseOptions
 }
-

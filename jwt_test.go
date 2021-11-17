@@ -26,7 +26,7 @@ func TestJwt_SUCCESS(t *testing.T) {
 	const id = "id"
 	const dataset = "dataset"
 
-	jwtAccess, err := NewToken(Config{
+	jwtAccess, err := NewToken(&Config{
 		Headers: Headers{
 			Type:               TokenType,
 			SignatureAlgorithm: TokenSignatureAlgorithmHS512,
@@ -43,7 +43,7 @@ func TestJwt_SUCCESS(t *testing.T) {
 		t.Errorf("the function returned the error: %s", err)
 	}
 
-	jwt, err := jwtAccess.Create(Claims{
+	jwt, err := jwtAccess.Create(&Claims{
 		JwtId: id,
 		Data:  []byte(dataset),
 	})
@@ -66,11 +66,9 @@ func TestJwt_SUCCESS(t *testing.T) {
 	}
 }
 
-
-
 func TestJwt_FAIL(t *testing.T) {
 
-	jwtRefresh, err := NewToken(Config{
+	jwtRefresh, err := NewToken(&Config{
 		Headers: Headers{
 			Type:               TokenType,
 			SignatureAlgorithm: TokenSignatureAlgorithmHS256,
@@ -79,7 +77,15 @@ func TestJwt_FAIL(t *testing.T) {
 			Issuer:  "tester",
 			Subject: TokenUseRefresh,
 		},
-		ParseOptions:     ParseOptions{},
+		ParseOptions: ParseOptions{
+			RequiredHeaderContentType: true,
+			RequiredClaimIssuer:       true,
+			RequiredClaimSubject:      true,
+			RequiredClaimJwtId:        true,
+			RequiredClaimData:         true,
+			SkipClaimsValidation:      true,
+			SkipSignatureValidation:   true,
+		},
 		TokenLifetimeSec: 1,
 		Key:              "secret",
 	})
@@ -87,7 +93,7 @@ func TestJwt_FAIL(t *testing.T) {
 		t.Errorf("the function returned the error: %s", err)
 	}
 
-	jwt, err := jwtRefresh.Create(Claims{
+	jwt, err := jwtRefresh.Create(&Claims{
 		JwtId: "id",
 		Data:  []byte("dataset"),
 	})
@@ -104,12 +110,11 @@ func TestJwt_FAIL(t *testing.T) {
 	}
 }
 
-
 func TestJwtParse_SUCCESS(t *testing.T) {
 
 	const jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ0ZXN0ZXIyIiwic3ViIjoiQWNjZXNzIiwiZXhwIjoyNjIzNTAzMzQ0LCJpYXQiOjE2MjM1MDMzNDMsImp0aSI6ImlkMiIsImRhdGEiOiJaR0YwWVhObGREST0ifQ.ilnH-Xqkf0EdgndVpCplOkTcTDeQLMZ5ivcmfzkq_fA"
 
-	jwtAccess, err := NewToken(Config{
+	jwtAccess, err := NewToken(&Config{
 		Key: "secret",
 	})
 	if err != nil {
@@ -127,7 +132,7 @@ func TestJwtParse_FAIL1(t *testing.T) {
 
 	const jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ0ZXN0ZXIyIiwic3ViIjoiQWNjZXNzIiwiZXhwIjoyNjIzNTAzMzQ0LCJpYXQiOjE2MjM1MDMzNDMsImp0aSI6ImlkMiIsImRhdGEiOiJaR0YwWVhObGREST0ifQ.ilnH-Xqkf0EdgndVpCplOkTcTDeQLMZ5ivcmfzkq_fA"
 
-	jwtAccess, err := NewToken(Config{
+	jwtAccess, err := NewToken(&Config{
 		Key: "wrong_secret",
 	})
 	if err != nil {
@@ -145,8 +150,8 @@ func TestJwtParse_FAIL2(t *testing.T) {
 
 	const jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ0ZXN0ZXIiLCJzdWIiOiJBY2Nlc3MiLCJleHAiOjE2MjM1MDM0NDMsImlhdCI6MTYyMzUwMzM0MywianRpIjoiaWQiLCJkYXRhIjoiWkdGMFlYTmxkREk9In0.1uslqn4e1Id3y84B_6zOBsA_E8a-9tXKnwXk2Wje14s"
 
-	jwtRefresh, err := NewToken(Config{
-		Key:              "secret",
+	jwtRefresh, err := NewToken(&Config{
+		Key: "secret",
 	})
 	if err != nil {
 		t.Errorf("the function returned the error: %s", err)

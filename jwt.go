@@ -19,11 +19,11 @@ type Config struct {
 }
 
 type jwt struct {
-	config Config
+	config *Config
 }
 
 func NewToken(
-	config Config) (*jwt, error) {
+	config *Config) (*jwt, error) {
 	if config.Key == "" {
 		return &jwt{}, fmt.Errorf("param config.Key is required")
 	}

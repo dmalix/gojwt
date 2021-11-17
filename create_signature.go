@@ -27,4 +27,3 @@ func makeSignature(unsignedToken string, signatureAlgorithm string, key string) 
 
 	return signature, nil
 }
-
