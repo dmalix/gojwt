@@ -24,7 +24,7 @@ So we will support a major version of Go until there are two newer major release
 With a [correctly configured](https://golang.org/doc/install#testing) Go toolchain:
 
 ```sh
-go get -u github.com/dmalix/go-jwt
+go get -u github.com/dmalix/gojwt
 ```
 
 ## Available Algorithms
@@ -41,16 +41,16 @@ The library implements JWT Verification and Signing using the following algorith
 Create a new JWT instance and configure the parameters:
 
 ```go
-jwtInstance, err := NewToken(&Config{
-   Headers: Headers{
-      Type:               TokenType,
-      SignatureAlgorithm: TokenSignatureAlgorithmHS256,  
+jwtInstance, err := gojwt.NewToken(&gojwt.Config{
+   Headers: gojwt.Headers{
+      Type:               gojwt.TokenType,
+      SignatureAlgorithm: gojwt.TokenSignatureAlgorithmHS256,   
    },
-   Claims: Claims{
+   Claims: gojwt.Claims{
       Issuer:  "some data",
-      Subject: TokenUseAccess,
+      Subject: "some subject",
    },
-   ParseOptions: ParseOptions{
+   ParseOptions: gojwt.ParseOptions{
       RequiredHeaderContentType:   true,
       RequiredClaimIssuer:         true,
       RequiredClaimSubject:        true,
@@ -68,7 +68,7 @@ if err != nil {
 Create a new token:
 
 ```go
-jwt, err := jwtInstance.Create(&Claims{
+jwt, err := jwtInstance.Create(&gojwt.Claims{
    JwtId: "some Id",
    Data:  []byte("some dataset"),
 })
@@ -81,7 +81,7 @@ And so you can check and get data from the token:
 
 ```go
 jwt := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-token, codeError, err := jwtInstance.Parse(jwt)
+jwtToken, codeError, err := jwtInstance.Parse(jwt)
 if err != nil {
    log.Fatalln(codeError, err)
 }
