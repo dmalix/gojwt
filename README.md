@@ -41,7 +41,7 @@ The library implements JWT Verification and Signing using the following algorith
 Create a new JWT instance and configure the parameters:
 
 ```go
-jwtInstance, err := NewToken(Config{
+jwtInstance, err := NewToken(&Config{
    Headers: Headers{
       Type:               TokenType,
       SignatureAlgorithm: TokenSignatureAlgorithmHS256,  
@@ -68,7 +68,7 @@ if err != nil {
 Create a new token:
 
 ```go
-jwt, err := jwtInstance.Create(Claims{
+jwt, err := jwtInstance.Create(&Claims{
    JwtId: "some Id",
    Data:  []byte("some dataset"),
 })

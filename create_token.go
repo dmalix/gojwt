@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (t *jwt) Create(claims Claims, h ...Headers) (string, error) {
+func (t *jwt) Create(claims *Claims, h ...*Headers) (string, error) {
 
 	// Init Headers
 	headers := t.config.Headers
@@ -61,7 +61,7 @@ func (t *jwt) Create(claims Claims, h ...Headers) (string, error) {
 	}
 
 	// Headers part
-	headersPart, err := makeHeaderPart(headers)
+	headersPart, err := createHeaderPart(&headers)
 	if err != nil {
 		return "", fmt.Errorf("failed to make the headersPart: %s", err)
 	}
@@ -83,7 +83,7 @@ func (t *jwt) Create(claims Claims, h ...Headers) (string, error) {
 		claims.ExpirationTime =
 			time.Unix(now, 0).Add(time.Second * time.Duration(t.config.TokenLifetimeSec)).UTC().Unix()
 	}
-	claimsPart, err := makeClaimsPart(claims)
+	claimsPart, err := createClaimsPart(claims)
 	if err != nil {
 		return "", fmt.Errorf("failed to make the claimsPart: %s", err)
 	}
