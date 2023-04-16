@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (t *jwt) Create(claims *Claims, h ...*Headers) (string, error) {
+func (t *Jwt) Create(claims *Claims, h ...*Headers) (string, error) {
 
 	// Init Headers
 	headers := t.config.Headers
