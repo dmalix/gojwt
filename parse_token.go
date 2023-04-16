@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (t *jwt) Parse(jwt string, options ...*ParseOptions) (*Token, string, error) {
+func (t *Jwt) Parse(jwt string, options ...*ParseOptions) (*Token, string, error) {
 
 	const NoPadding rune = -1
 	var token Token
@@ -69,7 +69,7 @@ func (t *jwt) Parse(jwt string, options ...*ParseOptions) (*Token, string, error
 		}
 		if signature != token.Signature {
 			return nil, ValidationErrorSignatureInvalid,
-				fmt.Errorf("failed to validate signature: jwtSample %s, jwt %s",
+				fmt.Errorf("failed to validate signature: jwtSample %s, Jwt %s",
 					headersPart+"."+claimsPart+"."+signature, jwt)
 		}
 	}
