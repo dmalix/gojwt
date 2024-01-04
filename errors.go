@@ -24,4 +24,4 @@ const (
 	ValidationErrorClaimsData        = "claim 'data' validation failed"
 )
 
-var errTokenIsInvalid = errors.New("token is invalid")
+var errInvalidToken = errors.New("invalid token")

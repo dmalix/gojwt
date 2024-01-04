@@ -11,17 +11,18 @@ const (
 )
 
 type Config struct {
-	Headers          Headers
-	Claims           Claims
-	ParseOptions     ParseOptions
-	TokenLifetimeSec int
-	Key              string
+	Headers       Headers
+	Claims        Claims
+	ParseOptions  ParseOptions
+	TokenLifetime int64
+	Key           string
 }
 
 type Jwt struct {
 	config *Config
 }
 
+//goland:noinspection GoExportedFuncWithUnexportedType
 func NewToken(
 	config *Config) (*Jwt, error) {
 	if config.Key == "" {

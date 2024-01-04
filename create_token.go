@@ -77,11 +77,11 @@ func (t *Jwt) Create(claims *Claims, h ...*Headers) (string, error) {
 		}
 	}
 	if claims.ExpirationTime == 0 {
-		if t.config.TokenLifetimeSec == 0 {
-			return "", fmt.Errorf("claims.ExpirationTime or config.TokenLifetimeSec must not be null")
+		if t.config.TokenLifetime == 0 {
+			return "", fmt.Errorf("claims.ExpirationTime or config.TokenLifetime must not be null")
 		}
 		claims.ExpirationTime =
-			time.Unix(now, 0).Add(time.Second * time.Duration(t.config.TokenLifetimeSec)).UTC().Unix()
+			time.Unix(now, 0).Add(time.Second * time.Duration(t.config.TokenLifetime)).UTC().Unix()
 	}
 	claimsPart, err := createClaimsPart(claims)
 	if err != nil {
