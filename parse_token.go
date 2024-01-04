@@ -76,45 +76,45 @@ func (t *jwt) Parse(jwt string, options ...*ParseOptions) (*Token, string, error
 
 	// Validate Headers
 	if parseOptions.RequiredHeaderContentType && token.Headers.ContentType == "" {
-		return nil, ValidationErrorHeadersContentType, errTokenIsInvalid
+		return nil, ValidationErrorHeadersContentType, errInvalidToken
 	}
 	if parseOptions.RequiredHeaderKeyId && token.Headers.KeyId == "" {
-		return nil, ValidationErrorHeadersKeyId, errTokenIsInvalid
+		return nil, ValidationErrorHeadersKeyId, errInvalidToken
 	}
 	if parseOptions.RequiredHeaderCritical && token.Headers.Critical == "" {
-		return nil, ValidationErrorHeadersCritical, errTokenIsInvalid
+		return nil, ValidationErrorHeadersCritical, errInvalidToken
 	}
 
 	// Validate Claims
 	if parseOptions.RequiredClaimIssuer && token.Claims.Issuer == "" {
-		return nil, ValidationErrorClaimsIssuer, errTokenIsInvalid
+		return nil, ValidationErrorClaimsIssuer, errInvalidToken
 	}
 	if parseOptions.RequiredClaimSubject && token.Claims.Subject == "" {
-		return nil, ValidationErrorClaimsSubject, errTokenIsInvalid
+		return nil, ValidationErrorClaimsSubject, errInvalidToken
 	}
 	if parseOptions.RequiredClaimAudience && token.Claims.Audience == "" {
-		return nil, ValidationErrorClaimsAudience, errTokenIsInvalid
+		return nil, ValidationErrorClaimsAudience, errInvalidToken
 	}
 	if parseOptions.RequiredClaimJwtId && token.Claims.JwtId == "" {
-		return nil, ValidationErrorClaimsJwtId, errTokenIsInvalid
+		return nil, ValidationErrorClaimsJwtId, errInvalidToken
 	}
 	if parseOptions.RequiredClaimData && token.Claims.Data == nil {
-		return nil, ValidationErrorClaimsData, errTokenIsInvalid
+		return nil, ValidationErrorClaimsData, errInvalidToken
 	}
 	if parseOptions.SkipClaimsValidation == false {
 		// Validate ExpirationTime value
 		if now > time.Unix(token.Claims.ExpirationTime, 0).UTC().Unix() {
-			return nil, ValidationErrorClaimsExpired, errTokenIsInvalid
+			return nil, ValidationErrorClaimsExpired, errInvalidToken
 		}
 		// Validate NotBefore value
 		if token.Claims.NotBefore != 0 {
 			if now < token.Claims.NotBefore {
-				return nil, ValidationErrorClaimsNotValidYet, errTokenIsInvalid
+				return nil, ValidationErrorClaimsNotValidYet, errInvalidToken
 			}
 		}
 		// Validate IssuedAt value
 		if now < token.Claims.IssuedAt {
-			return nil, ValidationErrorClaimsIssuedAt, errTokenIsInvalid
+			return nil, ValidationErrorClaimsIssuedAt, errInvalidToken
 		}
 	}
 

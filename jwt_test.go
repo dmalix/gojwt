@@ -35,9 +35,9 @@ func TestJwt_SUCCESS(t *testing.T) {
 			Issuer:  "tester",
 			Subject: TokenUseAccess,
 		},
-		ParseOptions:     ParseOptions{},
-		TokenLifetimeSec: 100,
-		Key:              "secret",
+		ParseOptions:  ParseOptions{},
+		TokenLifetime: 100,
+		Key:           "secret",
 	})
 	if err != nil {
 		t.Errorf("the function returned the error: %s", err)
@@ -86,8 +86,8 @@ func TestJwt_FAIL(t *testing.T) {
 			SkipClaimsValidation:      true,
 			SkipSignatureValidation:   true,
 		},
-		TokenLifetimeSec: 1,
-		Key:              "secret",
+		TokenLifetime: 1,
+		Key:           "secret",
 	})
 	if err != nil {
 		t.Errorf("the function returned the error: %s", err)
@@ -106,7 +106,7 @@ func TestJwt_FAIL(t *testing.T) {
 	_, codeError, err := jwtRefresh.Parse(jwt)
 	if err == nil && codeError != ValidationErrorClaimsExpired {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v: %v'",
-			err, errTokenIsInvalid, ValidationErrorClaimsExpired)
+			err, errInvalidToken, ValidationErrorClaimsExpired)
 	}
 }
 
@@ -142,7 +142,7 @@ func TestJwtParse_FAIL1(t *testing.T) {
 	_, codeError, err := jwtAccess.Parse(jwt)
 	if err == nil && codeError != ValidationErrorClaimsExpired {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v: %v'",
-			err, errTokenIsInvalid, ValidationErrorClaimsExpired)
+			err, errInvalidToken, ValidationErrorClaimsExpired)
 	}
 }
 
@@ -160,6 +160,6 @@ func TestJwtParse_FAIL2(t *testing.T) {
 	_, codeError, err := jwtRefresh.Parse(jwt)
 	if err == nil && codeError != ValidationErrorClaimsExpired {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v: %v'",
-			err, errTokenIsInvalid, ValidationErrorClaimsExpired)
+			err, errInvalidToken, ValidationErrorClaimsExpired)
 	}
 }
