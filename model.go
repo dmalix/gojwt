@@ -1,4 +1,4 @@
-package jwt
+package gojwt
 
 type Token struct {
 	Headers   Headers
@@ -7,20 +7,20 @@ type Token struct {
 }
 
 type Headers struct {
-	Type               string `json:"typ,omitempty"`
-	SignatureAlgorithm string `json:"alg,omitempty"`
-	ContentType        string `json:"cty,omitempty"`
-	KeyId              string `json:"kid,omitempty"`
-	Critical           string `json:"crit,omitempty"`
+	Type               EnumTokenTypeId               `json:"typ"`
+	SignatureAlgorithm EnumTokenSignatureAlgorithmId `json:"alg"`
+	ContentType        string                        `json:"cty,omitempty"`
+	KeyId              string                        `json:"kid,omitempty"`
+	Critical           string                        `json:"crit,omitempty"`
 }
 
 type Claims struct {
 	Issuer         string `json:"iss,omitempty"`
 	Subject        string `json:"sub,omitempty"`
 	Audience       string `json:"aud,omitempty"`
-	ExpirationTime int64  `json:"exp,omitempty"`
+	ExpirationTime int64  `json:"exp"`
 	NotBefore      int64  `json:"nbf,omitempty"`
-	IssuedAt       int64  `json:"iat,omitempty"`
+	IssuedAt       int64  `json:"iat"`
 	JwtId          string `json:"jti,omitempty"`
 	Data           []byte `json:"data,omitempty"` // It is a custom field for any data (for example, encrypted data).
 }

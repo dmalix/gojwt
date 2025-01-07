@@ -1,4 +1,4 @@
-package jwt
+package gojwt
 
 import (
 	"testing"
@@ -10,7 +10,7 @@ func TestMakeSignature__SUCCESS(t *testing.T) {
 	const unsignedToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ0ZXN0ZXIiLCJzdWIiOiJBY2Nlc3MiLCJleHAiOjE4MjM1MDMzNDQsImlhdCI6MTYyMzUwMzM0MywianRpIjoiaWQyIiwiZGF0YSI6IlpHRjBZWE5sZERJPSJ9"
 	const signature = "J6lTnsKnNVjl3qy_znq2lolFnW7sRqAo8I3Jv_ovV_0"
 
-	sample, err := makeSignature(unsignedToken, TokenSignatureAlgorithmHS256, "secret")
+	sample, err := makeSignature(unsignedToken, EnumTokenSignatureAlgorithmIdHS256, "secret")
 	if err != nil {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v'",
 			err, nil)
@@ -27,13 +27,13 @@ func TestJwt_SUCCESS(t *testing.T) {
 	const dataset = "dataset"
 
 	jwtAccess, err := NewToken(&Config{
-		Headers: Headers{
-			Type:               TokenType,
-			SignatureAlgorithm: TokenSignatureAlgorithmHS512,
+		Headers: &Headers{
+			Type:               EnumTokenTypeIdJWT,
+			SignatureAlgorithm: EnumTokenSignatureAlgorithmIdHS512,
 		},
-		Claims: Claims{
+		Claims: &Claims{
 			Issuer:  "tester",
-			Subject: TokenUseAccess,
+			Subject: "Access",
 		},
 		ParseOptions:  ParseOptions{},
 		TokenLifetime: 100,
@@ -55,8 +55,8 @@ func TestJwt_SUCCESS(t *testing.T) {
 	if err != nil {
 		t.Errorf("the function returned wrong error value: got '%v:%v' want '%v'", codeError, err, nil)
 	}
-	if token.Headers.Type != TokenType {
-		t.Errorf("the function returned wrong error value: got '%v' want '%v'", token.Headers.Type, TokenType)
+	if token.Headers.Type != EnumTokenTypeIdJWT {
+		t.Errorf("the function returned wrong error value: got '%v' want '%v'", token.Headers.Type, EnumTokenTypeIdJWT)
 	}
 	if token.Claims.JwtId != id {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v'", token.Claims.JwtId, id)
@@ -69,13 +69,13 @@ func TestJwt_SUCCESS(t *testing.T) {
 func TestJwt_FAIL(t *testing.T) {
 
 	jwtRefresh, err := NewToken(&Config{
-		Headers: Headers{
-			Type:               TokenType,
-			SignatureAlgorithm: TokenSignatureAlgorithmHS256,
+		Headers: &Headers{
+			Type:               EnumTokenTypeIdJWT,
+			SignatureAlgorithm: EnumTokenSignatureAlgorithmIdHS256,
 		},
-		Claims: Claims{
+		Claims: &Claims{
 			Issuer:  "tester",
-			Subject: TokenUseRefresh,
+			Subject: "Refresh",
 		},
 		ParseOptions: ParseOptions{
 			RequiredHeaderContentType: true,
@@ -104,9 +104,9 @@ func TestJwt_FAIL(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	_, codeError, err := jwtRefresh.Parse(jwt)
-	if err == nil && codeError != ValidationErrorClaimsExpired {
+	if err == nil && codeError != EnumValidationMessageIdClaimsExpired {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v: %v'",
-			err, errInvalidToken, ValidationErrorClaimsExpired)
+			err, EnumErrorIdInvalidToken, EnumValidationMessageIdClaimsExpired)
 	}
 }
 
@@ -124,7 +124,7 @@ func TestJwtParse_SUCCESS(t *testing.T) {
 	_, _, err = jwtAccess.Parse(jwt)
 	if err != nil {
 		t.Errorf("the function returned wrong error value: got '%v: %v' want '%v'",
-			err, ValidationErrorClaimsExpired, nil)
+			err, EnumValidationMessageIdClaimsExpired, nil)
 	}
 }
 
@@ -140,9 +140,9 @@ func TestJwtParse_FAIL1(t *testing.T) {
 	}
 
 	_, codeError, err := jwtAccess.Parse(jwt)
-	if err == nil && codeError != ValidationErrorClaimsExpired {
+	if err == nil && codeError != EnumValidationMessageIdClaimsExpired {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v: %v'",
-			err, errInvalidToken, ValidationErrorClaimsExpired)
+			err, EnumErrorIdInvalidToken, EnumValidationMessageIdClaimsExpired)
 	}
 }
 
@@ -158,8 +158,8 @@ func TestJwtParse_FAIL2(t *testing.T) {
 	}
 
 	_, codeError, err := jwtRefresh.Parse(jwt)
-	if err == nil && codeError != ValidationErrorClaimsExpired {
+	if err == nil && codeError != EnumValidationMessageIdClaimsExpired {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v: %v'",
-			err, errInvalidToken, ValidationErrorClaimsExpired)
+			err, EnumErrorIdInvalidToken, EnumValidationMessageIdClaimsExpired)
 	}
 }

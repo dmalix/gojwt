@@ -1,4 +1,4 @@
-package jwt
+package gojwt
 
 type MockDescription struct {
 	Expected struct {

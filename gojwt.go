@@ -1,6 +1,6 @@
-package jwt
+package gojwt
 
-type Domain interface {
+type Jwt interface {
 	Create(claims *Claims, headers ...*Headers) (string, error)
 	Parse(jwt string, parseOptions ...*ParseOptions) (*Token, string, error)
 
