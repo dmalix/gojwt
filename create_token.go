@@ -1,4 +1,4 @@
-package jwt
+package gojwt
 
 import (
 	"fmt"
@@ -6,62 +6,76 @@ import (
 	"time"
 )
 
-func (t *Jwt) Create(claims *Claims, h ...*Headers) (string, error) {
+func (receiver *jwt) Create(claims *Claims, headers ...*Headers) (string, error) {
 
 	// Init Headers
-	headers := t.config.Headers
-	if len(h) != 0 {
-		if h[0].Type != "" {
-			headers.Type = h[0].Type
-		}
-		if h[0].SignatureAlgorithm != "" {
-			headers.SignatureAlgorithm = h[0].SignatureAlgorithm
-		}
-		if h[0].ContentType != "" {
-			headers.ContentType = h[0].ContentType
-		}
-		if h[0].KeyId != "" {
-			headers.KeyId = h[0].KeyId
-		}
-		if h[0].Critical != "" {
-			headers.Critical = h[0].Critical
+	configHeaders := receiver.config.Headers
+	if len(headers) != 0 {
+		if configHeaders != nil {
+			if headers[0].Type != "" {
+				configHeaders.Type = headers[0].Type
+			}
+			if headers[0].SignatureAlgorithm != "" {
+				configHeaders.SignatureAlgorithm = headers[0].SignatureAlgorithm
+			}
+			if headers[0].ContentType != "" {
+				configHeaders.ContentType = headers[0].ContentType
+			}
+			if headers[0].KeyId != "" {
+				configHeaders.KeyId = headers[0].KeyId
+			}
+			if headers[0].Critical != "" {
+				configHeaders.Critical = headers[0].Critical
+			}
+		} else {
+			configHeaders = headers[0]
 		}
 	}
-	if headers.Type == "" {
+	if configHeaders == nil {
+		return "", fmt.Errorf("headers (Type, SignatureAlgorithm) must not be null")
+	}
+	if configHeaders.Type == "" {
 		return "", fmt.Errorf("headers.Type header must be present")
 	}
-	if headers.SignatureAlgorithm == "" {
+	if configHeaders.SignatureAlgorithm == "" {
 		return "", fmt.Errorf("headers.SignatureAlgorithm header must be present")
 	}
 
 	// Init Claims
-	if claims.Issuer == "" {
-		claims.Issuer = t.config.Claims.Issuer
+	if claims != nil {
+		if claims.Issuer == "" {
+			claims.Issuer = receiver.config.Claims.Issuer
+		}
+		if claims.Subject == "" {
+			claims.Subject = receiver.config.Claims.Subject
+		}
+		if claims.Audience == "" {
+			claims.Audience = receiver.config.Claims.Audience
+		}
+		if claims.ExpirationTime == 0 {
+			claims.ExpirationTime = receiver.config.Claims.ExpirationTime
+		}
+		if claims.NotBefore == 0 {
+			claims.NotBefore = receiver.config.Claims.NotBefore
+		}
+		if claims.IssuedAt == 0 {
+			claims.IssuedAt = receiver.config.Claims.IssuedAt
+		}
+		if claims.JwtId == "" {
+			claims.JwtId = receiver.config.Claims.JwtId
+		}
+		if claims.Data == nil {
+			claims.Data = receiver.config.Claims.Data
+		}
+	} else {
+		claims = receiver.config.Claims
 	}
-	if claims.Subject == "" {
-		claims.Subject = t.config.Claims.Subject
-	}
-	if claims.Audience == "" {
-		claims.Audience = t.config.Claims.Audience
-	}
-	if claims.ExpirationTime == 0 {
-		claims.ExpirationTime = t.config.Claims.ExpirationTime
-	}
-	if claims.NotBefore == 0 {
-		claims.NotBefore = t.config.Claims.NotBefore
-	}
-	if claims.IssuedAt == 0 {
-		claims.IssuedAt = t.config.Claims.IssuedAt
-	}
-	if claims.JwtId == "" {
-		claims.JwtId = t.config.Claims.JwtId
-	}
-	if claims.Data == nil {
-		claims.Data = t.config.Claims.Data
+	if claims == nil {
+		claims = &Claims{}
 	}
 
 	// Headers part
-	headersPart, err := createHeaderPart(&headers)
+	headersPart, err := createHeaderPart(configHeaders)
 	if err != nil {
 		return "", fmt.Errorf("failed to make the headersPart: %s", err)
 	}
@@ -77,11 +91,11 @@ func (t *Jwt) Create(claims *Claims, h ...*Headers) (string, error) {
 		}
 	}
 	if claims.ExpirationTime == 0 {
-		if t.config.TokenLifetime == 0 {
-			return "", fmt.Errorf("claims.ExpirationTime or config.TokenLifetime must not be null")
+		if receiver.config.TokenLifetime == 0 {
+			return "", fmt.Errorf("claims.ExpirationTime or config.TokenLifetime must be present")
 		}
 		claims.ExpirationTime =
-			time.Unix(now, 0).Add(time.Second * time.Duration(t.config.TokenLifetime)).UTC().Unix()
+			time.Unix(now, 0).Add(time.Second * time.Duration(receiver.config.TokenLifetime)).UTC().Unix()
 	}
 	claimsPart, err := createClaimsPart(claims)
 	if err != nil {
@@ -90,7 +104,7 @@ func (t *Jwt) Create(claims *Claims, h ...*Headers) (string, error) {
 
 	// Signature
 	unsignedToken := headersPart + "." + claimsPart
-	signature, err := makeSignature(unsignedToken, headers.SignatureAlgorithm, t.config.Key)
+	signature, err := makeSignature(unsignedToken, configHeaders.SignatureAlgorithm, receiver.config.Key)
 	if err != nil {
 		return "", fmt.Errorf("failed to make the signature: %s", err)
 	}

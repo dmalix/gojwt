@@ -12,7 +12,7 @@ dependencies-init:
 	rm --dir --recursive --force vendor
 	rm --force go.mod
 	rm --force go.sum
-	go mod init github.com/dmalix/jwt
+	go mod init github.com/dmalix/gojwt
 	go mod tidy
 	go mod vendor
 

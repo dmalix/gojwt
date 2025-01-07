@@ -1,4 +1,4 @@
-package jwt
+package gojwt
 
 import (
 	"crypto/hmac"
@@ -9,15 +9,15 @@ import (
 	"hash"
 )
 
-func makeSignature(unsignedToken string, signatureAlgorithm string, key string) (string, error) {
+func makeSignature(unsignedToken string, signatureAlgorithm EnumTokenSignatureAlgorithmId, key string) (string, error) {
 
 	var mac hash.Hash
 	const noPadding rune = -1
 
 	switch signatureAlgorithm {
-	case TokenSignatureAlgorithmHS256:
+	case EnumTokenSignatureAlgorithmIdHS256:
 		mac = hmac.New(sha256.New, []byte(key))
-	case TokenSignatureAlgorithmHS512:
+	case EnumTokenSignatureAlgorithmIdHS512:
 		mac = hmac.New(sha512.New, []byte(key))
 	default:
 		return "", fmt.Errorf("invalid the signature algorithm: %s", signatureAlgorithm)
