@@ -57,7 +57,7 @@ jwtInstance, err := gojwt.NewToken(&gojwt.Config{
       RequiredClaimJwtId:          true,
       RequiredClaimData:           true
    },
-   TokenLifetimeSec: gojwt.ConvertToTokenLifetime(100),
+   TokenLifetimeSec: 100,
    Key:              "your-256-bit-secret",
 })
 if err != nil {
