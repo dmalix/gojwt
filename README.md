@@ -43,8 +43,8 @@ Create a new JWT instance and configure the parameters:
 ```go
 jwtInstance, err := gojwt.NewToken(&gojwt.Config{
    Headers: &gojwt.Headers{
-      Type:               gojwt.EnumTokenTypeIdJWT,
-      SignatureAlgorithm: gojwt.EnumTokenSignatureAlgorithmIdHS256,   
+      Type:               gojwt.EnumTokenTypeJWT,
+      SignatureAlgorithm: gojwt.EnumTokenSignatureAlgorithmHS256,   
    },
    Claims: &gojwt.Claims{
       Issuer:  "some data",
