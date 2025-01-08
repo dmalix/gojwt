@@ -7,11 +7,11 @@ type Token struct {
 }
 
 type Headers struct {
-	Type               EnumTokenTypeId               `json:"typ"`
-	SignatureAlgorithm EnumTokenSignatureAlgorithmId `json:"alg"`
-	ContentType        string                        `json:"cty,omitempty"`
-	KeyId              string                        `json:"kid,omitempty"`
-	Critical           string                        `json:"crit,omitempty"`
+	Type               EnumTokenType               `json:"typ"`
+	SignatureAlgorithm EnumTokenSignatureAlgorithm `json:"alg"`
+	ContentType        string                      `json:"cty,omitempty"`
+	KeyId              string                      `json:"kid,omitempty"`
+	Critical           string                      `json:"crit,omitempty"`
 }
 
 type Claims struct {

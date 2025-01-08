@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (receiver *jwt) Parse(jwt string, options ...*ParseOptions) (*Token, EnumValidationMessageId, error) {
+func (receiver *resources) Parse(jwt string, options ...*ParseOptions) (*Token, EnumValidationMessage, error) {
 
 	const NoPadding rune = -1
 	var token Token
@@ -25,27 +25,27 @@ func (receiver *jwt) Parse(jwt string, options ...*ParseOptions) (*Token, EnumVa
 	// Split Token values
 	jwtParts := strings.Split(jwt, ".")
 	if len(jwtParts) != 3 {
-		return nil, EnumValidationMessageIdMalformed, EnumErrorIdMalformed
+		return nil, EnumValidationMessageMalformed, EnumErrorMalformed
 	}
 
 	// Parse Headers
 	valueByte, err := base64.URLEncoding.WithPadding(NoPadding).DecodeString(jwtParts[0])
 	if err != nil {
-		return nil, EnumValidationMessageIdHeadersMalformed, err
+		return nil, EnumValidationMessageHeadersMalformed, err
 	}
 	err = json.Unmarshal(valueByte, &token.Headers)
 	if err != nil {
-		return nil, EnumValidationMessageIdHeadersMalformed, err
+		return nil, EnumValidationMessageHeadersMalformed, err
 	}
 
 	// Parse Claims
 	valueByte, err = base64.URLEncoding.WithPadding(NoPadding).DecodeString(jwtParts[1])
 	if err != nil {
-		return nil, EnumValidationMessageIdClaimsMalformed, err
+		return nil, EnumValidationMessageClaimsMalformed, err
 	}
 	err = json.Unmarshal(valueByte, &token.Claims)
 	if err != nil {
-		return nil, EnumValidationMessageIdClaimsMalformed, err
+		return nil, EnumValidationMessageClaimsMalformed, err
 	}
 
 	// Get Signature
@@ -55,19 +55,19 @@ func (receiver *jwt) Parse(jwt string, options ...*ParseOptions) (*Token, EnumVa
 	if parseOptions.SkipSignatureValidation == false {
 		headersPart, err := createHeaderPart(&token.Headers)
 		if err != nil {
-			return nil, EnumValidationMessageIdUnverifiable, fmt.Errorf("failed to make the headersPart: %s", err)
+			return nil, EnumValidationMessageUnverifiable, fmt.Errorf("failed to make the headersPart: %s", err)
 		}
 		claimsPart, err := createClaimsPart(&token.Claims)
 		if err != nil {
-			return nil, EnumValidationMessageIdUnverifiable, fmt.Errorf("failed to make the claimsPart: %s", err)
+			return nil, EnumValidationMessageUnverifiable, fmt.Errorf("failed to make the claimsPart: %s", err)
 		}
 		unsignedToken := headersPart + "." + claimsPart
 		signature, err := makeSignature(unsignedToken, token.Headers.SignatureAlgorithm, receiver.config.Key)
 		if err != nil {
-			return nil, EnumValidationMessageIdUnverifiable, fmt.Errorf("failed to make the signature: %s", err)
+			return nil, EnumValidationMessageUnverifiable, fmt.Errorf("failed to make the signature: %s", err)
 		}
 		if signature != token.Signature {
-			return nil, EnumValidationMessageIdSignatureInvalid,
+			return nil, EnumValidationMessageSignatureInvalid,
 				fmt.Errorf("failed to validate signature: jwtSample %s, jwt %s",
 					headersPart+"."+claimsPart+"."+signature, jwt)
 		}
@@ -75,45 +75,45 @@ func (receiver *jwt) Parse(jwt string, options ...*ParseOptions) (*Token, EnumVa
 
 	// Validate Headers
 	if parseOptions.RequiredHeaderContentType && token.Headers.ContentType == "" {
-		return nil, EnumValidationMessageIdHeadersContentType, EnumErrorIdInvalidToken
+		return nil, EnumValidationMessageHeadersContentType, EnumErrorInvalidToken
 	}
 	if parseOptions.RequiredHeaderKeyId && token.Headers.KeyId == "" {
-		return nil, EnumValidationMessageIdHeadersKeyId, EnumErrorIdInvalidToken
+		return nil, EnumValidationMessageHeadersKeyId, EnumErrorInvalidToken
 	}
 	if parseOptions.RequiredHeaderCritical && token.Headers.Critical == "" {
-		return nil, EnumValidationMessageIdHeadersCritical, EnumErrorIdInvalidToken
+		return nil, EnumValidationMessageHeadersCritical, EnumErrorInvalidToken
 	}
 
 	// Validate Claims
 	if parseOptions.RequiredClaimIssuer && token.Claims.Issuer == "" {
-		return nil, EnumValidationMessageIdClaimsIssuer, EnumErrorIdInvalidToken
+		return nil, EnumValidationMessageClaimsIssuer, EnumErrorInvalidToken
 	}
 	if parseOptions.RequiredClaimSubject && token.Claims.Subject == "" {
-		return nil, EnumValidationMessageIdClaimsSubject, EnumErrorIdInvalidToken
+		return nil, EnumValidationMessageClaimsSubject, EnumErrorInvalidToken
 	}
 	if parseOptions.RequiredClaimAudience && token.Claims.Audience == "" {
-		return nil, EnumValidationMessageIdClaimsAudience, EnumErrorIdInvalidToken
+		return nil, EnumValidationMessageClaimsAudience, EnumErrorInvalidToken
 	}
 	if parseOptions.RequiredClaimJwtId && token.Claims.JwtId == "" {
-		return nil, EnumValidationMessageIdClaimsJwtId, EnumErrorIdInvalidToken
+		return nil, EnumValidationMessageClaimsJwtId, EnumErrorInvalidToken
 	}
 	if parseOptions.RequiredClaimData && token.Claims.Data == nil {
-		return nil, EnumValidationMessageIdClaimsData, EnumErrorIdInvalidToken
+		return nil, EnumValidationMessageClaimsData, EnumErrorInvalidToken
 	}
 	if parseOptions.SkipClaimsValidation == false {
 		// Validate ExpirationTime value
 		if now > time.Unix(token.Claims.ExpirationTime, 0).UTC().Unix() {
-			return nil, EnumValidationMessageIdClaimsExpired, EnumErrorIdInvalidToken
+			return nil, EnumValidationMessageClaimsExpired, EnumErrorInvalidToken
 		}
 		// Validate NotBefore value
 		if token.Claims.NotBefore != 0 {
 			if now < token.Claims.NotBefore {
-				return nil, EnumValidationMessageIdClaimsNotValidYet, EnumErrorIdInvalidToken
+				return nil, EnumValidationMessageClaimsNotValidYet, EnumErrorInvalidToken
 			}
 		}
 		// Validate IssuedAt value
 		if now < token.Claims.IssuedAt {
-			return nil, EnumValidationMessageIdClaimsIssuedAt, EnumErrorIdInvalidToken
+			return nil, EnumValidationMessageClaimsIssuedAt, EnumErrorInvalidToken
 		}
 	}
 

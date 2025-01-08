@@ -1,13 +1,13 @@
 package gojwt
 
-func (receiver *jwt) GetHeaders() *Headers {
+func (receiver *resources) GetHeaders() *Headers {
 	return receiver.config.Headers
 }
 
-func (receiver *jwt) GetClaims() *Claims {
+func (receiver *resources) GetClaims() *Claims {
 	return receiver.config.Claims
 }
 
-func (receiver *jwt) GetParseOptions() ParseOptions {
+func (receiver *resources) GetParseOptions() ParseOptions {
 	return receiver.config.ParseOptions
 }
