@@ -2,17 +2,17 @@ package gojwt
 
 import "fmt"
 
-type EnumTokenSignatureAlgorithmId string
+type EnumTokenSignatureAlgorithm string
 
 const (
-	EnumTokenSignatureAlgorithmIdHS256 EnumTokenSignatureAlgorithmId = "HS256"
-	EnumTokenSignatureAlgorithmIdHS512 EnumTokenSignatureAlgorithmId = "HS512"
+	EnumTokenSignatureAlgorithmHS256 EnumTokenSignatureAlgorithm = "HS256"
+	EnumTokenSignatureAlgorithmHS512 EnumTokenSignatureAlgorithm = "HS512"
 )
 
-type EnumTokenTypeId string
+type EnumTokenType string
 
 const (
-	EnumTokenTypeIdJWT EnumTokenTypeId = "JWT"
+	EnumTokenTypeJWT EnumTokenType = "JWT"
 )
 
 type Config struct { // If you are using the package only for parsing, optional values can be nil
@@ -23,17 +23,17 @@ type Config struct { // If you are using the package only for parsing, optional 
 	Key           string
 }
 
-type jwt struct {
+type Resources struct {
 	config *Config
 }
 
 //goland:noinspection GoExportedFuncWithUnexportedType
 func NewToken(
-	config *Config) (*jwt, error) {
+	config *Config) (*Resources, error) {
 	if config.Key == "" {
-		return &jwt{}, fmt.Errorf("param config.Key is required")
+		return nil, fmt.Errorf("param config.Key is required")
 	}
-	return &jwt{
+	return &Resources{
 		config: config,
 	}, nil
 }

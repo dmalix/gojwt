@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (receiver *jwt) Create(claims *Claims, headers ...*Headers) (string, error) {
+func (receiver *Resources) Create(claims *Claims, headers ...*Headers) (string, error) {
 
 	// Init Headers
 	configHeaders := receiver.config.Headers
