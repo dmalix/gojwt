@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (receiver *Resources) Parse(jwt string, options ...*ParseOptions) (*Token, EnumValidationMessage, error) {
+func (receiver *resources) Parse(jwt string, options ...*ParseOptions) (*Token, EnumValidationMessage, error) {
 
 	const NoPadding rune = -1
 	var token Token

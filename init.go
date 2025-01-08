@@ -23,17 +23,17 @@ type Config struct { // If you are using the package only for parsing, optional 
 	Key           string
 }
 
-type Resources struct {
+type resources struct {
 	config *Config
 }
 
 //goland:noinspection GoExportedFuncWithUnexportedType
 func NewToken(
-	config *Config) (*Resources, error) {
+	config *Config) (*resources, error) {
 	if config.Key == "" {
 		return nil, fmt.Errorf("param config.Key is required")
 	}
-	return &Resources{
+	return &resources{
 		config: config,
 	}, nil
 }
