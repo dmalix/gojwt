@@ -9,22 +9,32 @@ So we will support a major version of Go until there are two newer major release
 
 ---
 
+* [Features](#features)
 * [Install](#install)
 * [Available Algorithms](#available-algorithms)
 * [Quick Start](#quick-start)
+* [Usage](#usage)
 * [Issue Reporting](#issue-reporting)
 * [Secure](#secure)
+* [Contributing](#contributing)
 * [Author](#author)
 * [License](#license)
 
 ---
 
+## Features
+
+*   **Token Creation**: Easily create JWTs with customizable headers and claims.
+*   **Token Parsing & Validation**: Parse JWTs and validate them against predefined options, including required claims and header types.
+*   **Algorithm Support**: Supports HMAC with SHA-256 (HS256) and SHA-512 (HS512) for signing and verification.
+*   **Configurable Lifetime**: Set a specific lifetime for your tokens.
+
 ## Install
 
-With a [correctly configured](https://golang.org/doc/install#testing) Go toolchain:
+To add the library to your project, run:
 
 ```sh
-go get -u github.com/dmalix/gojwt
+go get github.com/dmalix/gojwt
 ```
 
 ## Available Algorithms
@@ -38,60 +48,279 @@ The library implements JWT Verification and Signing using the following algorith
 
 ## Quick Start
 
-Create a new JWT instance and configure the parameters:
+This section provides a minimal example to get you started with creating and parsing JWTs.
+
+> **Note:** The `Data` field in `Claims` is a generic `[]byte` field. You can serialize any custom data (e.g., a struct) to JSON and store it there.
+
+First, create a new JWT instance and configure its parameters:
 
 ```go
-jwtInstance, err := gojwt.NewToken(&gojwt.Config{
-   Headers: &gojwt.Headers{
-      Type:               gojwt.EnumTokenTypeJWT,
-      SignatureAlgorithm: gojwt.EnumTokenSignatureAlgorithmHS256,   
-   },
-   Claims: &gojwt.Claims{
-      Issuer:  "some data",
-      Subject: "some subject",
-   },
-   ParseOptions: gojwt.ParseOptions{
-      RequiredHeaderContentType:   true,
-      RequiredClaimIssuer:         true,
-      RequiredClaimSubject:        true,
-      RequiredClaimJwtId:          true,
-      RequiredClaimData:           true
-   },
-   TokenLifetimeSec: 100,
-   Key:              "your-256-bit-secret",
-})
-if err != nil {
-   log.Fatal(err)
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/dmalix/gojwt/gojwt"
+)
+
+func main() {
+	// 1. Create a new JWT instance with configuration
+	jwtInstance, err := gojwt.NewToken(&gojwt.Config{
+		Headers: &gojwt.Headers{
+			Type:               gojwt.EnumTokenTypeJWT,
+			SignatureAlgorithm: gojwt.EnumTokenSignatureAlgorithmHS256,
+		},
+		Claims: &gojwt.Claims{
+			Issuer:  "your-app",
+			Subject: "user-authentication",
+		},
+		ParseOptions: gojwt.ParseOptions{
+			RequiredHeaderContentType: false, // Not required for this example
+			RequiredClaimIssuer:         true,
+			RequiredClaimSubject:        true,
+			RequiredClaimJwtId:          true,
+			RequiredClaimData:           true,
+		},
+		TokenLifetimeSec: 3600, // Token valid for 1 hour
+		Key:              "your-256-bit-secret-key-that-is-at-least-32-bytes-long", // Use a strong, secret key
+	})
+	if err != nil {
+		log.Fatalf("Error creating JWT instance: %v", err)
+	}
+
+	// 2. Create a new token with specific claims
+	tokenID := "unique-session-id-123"
+	userData := map[string]interface{}{
+		"userID": "12345",
+		"role":   "admin",
+	}
+	userDataBytes, _ := json.Marshal(userData)
+
+	jwtString, err := jwtInstance.Create(&gojwt.Claims{
+		JwtId: tokenID,
+		Data:  userDataBytes,
+	})
+	if err != nil {
+		log.Fatalf("Error creating JWT: %v", err)
+	}
+	fmt.Printf("Generated JWT: %s\n\n", jwtString)
+
+	// 3. Parse and validate the token
+	fmt.Println("Parsing and validating the token...")
+	parsedToken, validationMessage, err := jwtInstance.Parse(jwtString)
+	if err != nil {
+		log.Fatalf("Error parsing JWT: %s - %v", validationMessage, err)
+	}
+
+	fmt.Printf("Token successfully parsed and validated!\n")
+	fmt.Printf("Parsed Token Headers: %+v\n", parsedToken.Headers)
+	fmt.Printf("Parsed Token Claims: %+v\n", parsedToken.Claims)
+	fmt.Printf("Parsed Token Data: %s\n", string(parsedToken.Claims.Data))
+
+	// Example of an invalid token (e.g., expired)
+	fmt.Println("\nDemonstrating an expired token (will fail validation):")
+	expiredJwtInstance, _ := gojwt.NewToken(&gojwt.Config{
+		Headers: &gojwt.Headers{
+			Type:               gojwt.EnumTokenTypeJWT,
+			SignatureAlgorithm: gojwt.EnumTokenSignatureAlgorithmHS256,
+		},
+		Claims: &gojwt.Claims{
+			Issuer:  "your-app",
+			Subject: "user-authentication",
+		},
+		TokenLifetimeSec: 1, // Very short lifetime for demonstration
+		Key:              "your-256-bit-secret-key-that-is-at-least-32-bytes-long",
+	})
+
+	expiredJwtString, _ := expiredJwtInstance.Create(&gojwt.Claims{
+		JwtId: "expired-token-id",
+		Data:  []byte("expired data"),
+	})
+
+	fmt.Printf("Waiting for 2 seconds to ensure token expires...\n")
+	time.Sleep(2 * time.Second) // Wait for the token to expire
+
+	_, expiredValidationMessage, expiredErr := expiredJwtInstance.Parse(expiredJwtString)
+	if expiredErr != nil {
+		fmt.Printf("Expected error for expired token: %s - %v\n", expiredValidationMessage, expiredErr)
+	} else {
+		fmt.Println("Unexpected: Expired token was validated successfully.")
+	}
 }
 ```
 
-Create a new token:
+## Usage
+
+This section provides more detailed examples and best practices for using the `gojwt` library.
+
+### Custom Claims
+
+You can store custom claims by serializing your struct into the `Data` field of `Claims`. When parsing, you can deserialize it back. Example:
 
 ```go
-jwt, err := jwtInstance.Create(&gojwt.Claims{
-   JwtId: "some Id",
-   Data:  []byte("some dataset"),
-})
-if err != nil {
-   log.Fatal(err)
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+
+	"github.com/dmalix/gojwt/gojwt"
+)
+
+type MyCustomClaims struct {
+	Email   string `json:"email"`
+	UserID  string `json:"user_id"`
+	UserRole string `json:"user_role"`
+}
+
+func main() {
+	jwtInstance, err := gojwt.NewToken(&gojwt.Config{
+		Headers: &gojwt.Headers{
+			Type:               gojwt.EnumTokenTypeJWT,
+			SignatureAlgorithm: gojwt.EnumTokenSignatureAlgorithmHS256,
+		},
+		Claims: &gojwt.Claims{
+			Issuer:  "my-service",
+			Subject: "user-session",
+		},
+		TokenLifetimeSec: 3600,
+		Key:              "super-secret-key-for-custom-claims-example-12345",
+	})
+	if err != nil {
+		log.Fatalf("Error creating JWT instance: %v", err)
+	}
+
+	// Serialize custom claims
+	customClaims := MyCustomClaims{
+		Email:    "test@example.com",
+		UserID:   "user-456",
+		UserRole: "premium",
+	}
+	dataBytes, _ := json.Marshal(customClaims)
+
+	jwtString, err := jwtInstance.Create(&gojwt.Claims{
+		JwtId: "session-abc-123",
+		Data:  dataBytes,
+	})
+	if err != nil {
+		log.Fatalf("Error creating JWT with custom claims: %v", err)
+	}
+	fmt.Printf("JWT with Custom Claims: %s\n\n", jwtString)
+
+	// Parse and deserialize custom claims
+	parsedToken, validationMessage, err := jwtInstance.Parse(jwtString)
+	if err != nil {
+		log.Fatalf("Error parsing JWT with custom claims: %s - %v", validationMessage, err)
+	}
+	var receivedCustomClaims MyCustomClaims
+	if err := json.Unmarshal(parsedToken.Claims.Data, &receivedCustomClaims); err != nil {
+		log.Fatalf("Error unmarshaling custom claims: %v", err)
+	}
+	fmt.Printf("Parsed Custom Claims: %+v\n", receivedCustomClaims)
 }
 ```
 
-And so you can check and get data from the token:
+### Token Validation Options
+
+The `ParseOptions` struct allows you to specify which claims and headers are required during token parsing. If a required field is missing or invalid, the `Parse` method will return an error.
 
 ```go
-jwt := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-jwtToken, codeError, err := jwtInstance.Parse(jwt)
-if err != nil {
-   log.Fatalln(codeError, err)
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/dmalix/gojwt/gojwt"
+)
+
+func main() {
+	// Configure JWT instance with strict parsing options
+	jwtInstance, err := gojwt.NewToken(&gojwt.Config{
+		Headers: &gojwt.Headers{
+			Type:               gojwt.EnumTokenTypeJWT,
+			SignatureAlgorithm: gojwt.EnumTokenSignatureAlgorithmHS256,
+		},
+		Claims: &gojwt.Claims{
+			Issuer:  "secure-app",
+			Subject: "api-access",
+		},
+		ParseOptions: gojwt.ParseOptions{
+			RequiredHeaderContentType:   false, // Content-Type header is optional
+			RequiredClaimIssuer:         true,  // Issuer claim must be present
+			RequiredClaimSubject:        true,  // Subject claim must be present
+			RequiredClaimJwtId:          true,  // JWT ID claim must be present
+			RequiredClaimData:           false, // Data claim is optional
+		},
+		TokenLifetimeSec: 600, // 10 minutes
+		Key:              "a-very-secure-key-for-validation-options-example",
+	})
+	if err != nil {
+		log.Fatalf("Error creating JWT instance: %v", err)
+	}
+
+	// Create a token that satisfies all required claims
+	validJwtString, err := jwtInstance.Create(&gojwt.Claims{
+		JwtId: "transaction-001",
+		Data:  []byte("{\"amount\": 100.00}"),
+	})
+	if err != nil {
+		log.Fatalf("Error creating valid JWT: %v", err)
+	}
+	fmt.Printf("Valid JWT: %s\n", validJwtString)
+
+	// Attempt to parse the valid token
+	_, validationMessage, err := jwtInstance.Parse(validJwtString)
+	if err != nil {
+		log.Fatalf("Error parsing valid JWT: %s - %v", validationMessage, err)
+	}
+	fmt.Println("Valid JWT parsed successfully.")
+
+	// --- Demonstrate a token that will fail validation ---
+
+	// Create a token missing a required claim (e.g., JwtId)
+	invalidJwtString, err := jwtInstance.Create(&gojwt.Claims{
+		// JwtId is intentionally omitted here
+		Data: []byte("{\"operation\": \"read\"}"),
+	})
+	if err != nil {
+		log.Fatalf("Error creating invalid JWT: %v", err)
+	}
+	fmt.Printf("\nInvalid JWT (missing JwtId): %s\n", invalidJwtString)
+
+	// Attempt to parse the invalid token
+	_, invalidValidationMessage, invalidErr := jwtInstance.Parse(invalidJwtString)
+	if invalidErr != nil {
+		fmt.Printf("Expected error for invalid JWT: %s - %v\n", invalidValidationMessage, invalidErr)
+	} else {
+		fmt.Println("Unexpected: Invalid JWT was validated successfully.")
+	}
 }
 ```
+
+## Contributing
+
+We welcome contributions to the `gojwt` project! If you're interested in contributing, please follow these guidelines:
+
+1.  **Fork the repository**.
+2.  **Create a new branch** for your feature or bug fix.
+3.  **Write clear, concise code** and ensure it adheres to the existing coding style.
+4.  **Write tests** for your changes to ensure functionality and prevent regressions.
+5.  **Submit a pull request** with a detailed description of your changes.
+
+---
 
 ## Issue Reporting
 If you have found a bug or if you have a feature request, please report them at this repository issues section. Please do not report security vulnerabilities on the public GitHub issue tracker.
 
 ## Secure
 If you discover any security related issues, please email [dmalix@yahoo.com](mailto:dmalix@yahoo.com) instead of using the issue tracker.
+
+> **Security Note:** Always use a strong, secret key for signing tokens. Never hardcode secrets in your source code or commit them to version control.
 
 ## Author
 [DmAlix](mailto:dmalix@yahoo.com)

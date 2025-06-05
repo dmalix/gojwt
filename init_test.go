@@ -1,6 +1,7 @@
 package gojwt
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 )
@@ -161,5 +162,252 @@ func TestJwtParse_FAIL2(t *testing.T) {
 	if err == nil && codeError != EnumValidationMessageClaimsExpired {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v: %v'",
 			err, EnumErrorInvalidToken, EnumValidationMessageClaimsExpired)
+	}
+}
+
+func TestEnumTokenType_UnmarshalJSON(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   string
+		want    EnumTokenType
+		wantErr bool
+	}{
+		{
+			name:    "Valid JWT type",
+			input:   `"JWT"`,
+			want:    EnumTokenTypeJWT,
+			wantErr: false,
+		},
+		{
+			name:    "Invalid type",
+			input:   `"INVALID"`,
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name:    "Empty type",
+			input:   `""`,
+			want:    "",
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var typ EnumTokenType
+			err := json.Unmarshal([]byte(tt.input), &typ)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UnmarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr && typ != tt.want {
+				t.Errorf("UnmarshalJSON() got = %v, want %v", typ, tt.want)
+			}
+		})
+	}
+}
+
+func TestEnumTokenType_MarshalJSON(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   EnumTokenType
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "Marshal JWT type",
+			input:   EnumTokenTypeJWT,
+			want:    `"JWT"`,
+			wantErr: false,
+		},
+		{
+			name:    "Marshal empty type",
+			input:   EnumTokenType(""),
+			want:    `""`,
+			wantErr: false,
+		},
+		{
+			name:    "Marshal invalid type",
+			input:   EnumTokenType("INVALID"),
+			want:    `"INVALID"`,
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := json.Marshal(tt.input)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("MarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if string(got) != tt.want {
+				t.Errorf("MarshalJSON() got = %v, want %v", string(got), tt.want)
+			}
+		})
+	}
+}
+
+func TestEnumTokenType_IsValid(t *testing.T) {
+	tests := []struct {
+		name  string
+		input EnumTokenType
+		want  bool
+	}{
+		{
+			name:  "Valid JWT type",
+			input: EnumTokenTypeJWT,
+			want:  true,
+		},
+		{
+			name:  "Invalid type",
+			input: EnumTokenType("INVALID"),
+			want:  false,
+		},
+		{
+			name:  "Empty type",
+			input: EnumTokenType(""),
+			want:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.input.IsValid(); got != tt.want {
+				t.Errorf("IsValid() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestEnumTokenSignatureAlgorithm_UnmarshalJSON(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   string
+		want    EnumTokenSignatureAlgorithm
+		wantErr bool
+	}{
+		{
+			name:    "Valid HS256 algorithm",
+			input:   `"HS256"`,
+			want:    EnumTokenSignatureAlgorithmHS256,
+			wantErr: false,
+		},
+		{
+			name:    "Valid HS512 algorithm",
+			input:   `"HS512"`,
+			want:    EnumTokenSignatureAlgorithmHS512,
+			wantErr: false,
+		},
+		{
+			name:    "Invalid algorithm",
+			input:   `"INVALID"`,
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name:    "Empty algorithm",
+			input:   `""`,
+			want:    "",
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var alg EnumTokenSignatureAlgorithm
+			err := json.Unmarshal([]byte(tt.input), &alg)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UnmarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr && alg != tt.want {
+				t.Errorf("UnmarshalJSON() got = %v, want %v", alg, tt.want)
+			}
+		})
+	}
+}
+
+func TestEnumTokenSignatureAlgorithm_MarshalJSON(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   EnumTokenSignatureAlgorithm
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "Marshal HS256 algorithm",
+			input:   EnumTokenSignatureAlgorithmHS256,
+			want:    `"HS256"`,
+			wantErr: false,
+		},
+		{
+			name:    "Marshal HS512 algorithm",
+			input:   EnumTokenSignatureAlgorithmHS512,
+			want:    `"HS512"`,
+			wantErr: false,
+		},
+		{
+			name:    "Marshal empty algorithm",
+			input:   EnumTokenSignatureAlgorithm(""),
+			want:    `""`,
+			wantErr: false,
+		},
+		{
+			name:    "Marshal invalid algorithm",
+			input:   EnumTokenSignatureAlgorithm("INVALID"),
+			want:    `"INVALID"`,
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := json.Marshal(tt.input)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("MarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if string(got) != tt.want {
+				t.Errorf("MarshalJSON() got = %v, want %v", string(got), tt.want)
+			}
+		})
+	}
+}
+
+func TestEnumTokenSignatureAlgorithm_IsValid(t *testing.T) {
+	tests := []struct {
+		name  string
+		input EnumTokenSignatureAlgorithm
+		want  bool
+	}{
+		{
+			name:  "Valid HS256 algorithm",
+			input: EnumTokenSignatureAlgorithmHS256,
+			want:  true,
+		},
+		{
+			name:  "Valid HS512 algorithm",
+			input: EnumTokenSignatureAlgorithmHS512,
+			want:  true,
+		},
+		{
+			name:  "Invalid algorithm",
+			input: EnumTokenSignatureAlgorithm("INVALID"),
+			want:  false,
+		},
+		{
+			name:  "Empty algorithm",
+			input: EnumTokenSignatureAlgorithm(""),
+			want:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.input.IsValid(); got != tt.want {
+				t.Errorf("IsValid() got = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
