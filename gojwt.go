@@ -16,20 +16,26 @@ const (
 )
 
 type Config struct { // If you are using the package only for parsing, optional values can be nil
-	Headers          *Headers
-	Claims           *Claims
-	ParseOptions     ParseOptions
-	TokenLifetimeSec int64
-	Key              string
+	Headers       *Headers
+	Claims        *Claims
+	ParseOptions  ParseOptions
+	TokenLifetime int64
+	Key           string
+}
+
+type Jwt struct {
+	config *Config
 }
 
 //goland:noinspection GoExportedFuncWithUnexportedType
 func NewToken(
-	config *Config) (*Config, error) {
+	config *Config) (*Jwt, error) {
 	if config.Key == "" {
 		return nil, fmt.Errorf("param config.Key is required")
 	}
-	return config, nil
+	return &Jwt{
+		config: config,
+	}, nil
 }
 
 func (e *EnumTokenSignatureAlgorithm) UnmarshalJSON(b []byte) error {

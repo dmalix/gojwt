@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func ParseToken(config *Config, jwt string, options ...*ParseOptions) (*Token, EnumValidationMessage, error) {
+func (receiver *Jwt) Parse(jwt string, options ...*ParseOptions) (*Token, EnumValidationMessage, error) {
 
 	const NoPadding rune = -1
 	var token Token
@@ -19,7 +19,7 @@ func ParseToken(config *Config, jwt string, options ...*ParseOptions) (*Token, E
 	if len(options) != 0 {
 		parseOptions = options[0]
 	} else {
-		parseOptions = &config.ParseOptions
+		parseOptions = &receiver.config.ParseOptions
 	}
 
 	// Split Token values
@@ -62,7 +62,7 @@ func ParseToken(config *Config, jwt string, options ...*ParseOptions) (*Token, E
 			return nil, EnumValidationMessageUnverifiable, fmt.Errorf("failed to make the claimsPart: %s", err)
 		}
 		unsignedToken := headersPart + "." + claimsPart
-		signature, err := makeSignature(unsignedToken, token.Headers.SignatureAlgorithm, config.Key)
+		signature, err := makeSignature(unsignedToken, token.Headers.SignatureAlgorithm, receiver.config.Key)
 		if err != nil {
 			return nil, EnumValidationMessageUnverifiable, fmt.Errorf("failed to make the signature: %s", err)
 		}
