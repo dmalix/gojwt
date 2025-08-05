@@ -52,7 +52,7 @@ This section provides a minimal example to get you started with creating and par
 
 > **Note:** The `Data` field in `Claims` is a generic `[]byte` field. You can serialize any custom data (e.g., a struct) to JSON and store it there.
 
-First, create a new JWT config:
+First, create a new JWT instance and configure its parameters:
 
 ```go
 package main
@@ -63,12 +63,12 @@ import (
 	"log"
 	"time"
 
-	"github.com/dmalix/gojwt"
+	"github.com/dmalix/gojwt/gojwt"
 )
 
 func main() {
-	// 1. Create a new JWT config
-	config, err := gojwt.NewToken(&gojwt.Config{
+	// 1. Create a new JWT instance with configuration
+	jwtInstance, err := gojwt.NewToken(&gojwt.Config{
 		Headers: &gojwt.Headers{
 			Type:               gojwt.EnumTokenTypeJWT,
 			SignatureAlgorithm: gojwt.EnumTokenSignatureAlgorithmHS256,
@@ -88,7 +88,7 @@ func main() {
 		Key:              "your-256-bit-secret-key-that-is-at-least-32-bytes-long", // Use a strong, secret key
 	})
 	if err != nil {
-		log.Fatalf("Error creating JWT config: %v", err)
+		log.Fatalf("Error creating JWT instance: %v", err)
 	}
 
 	// 2. Create a new token with specific claims
@@ -99,7 +99,7 @@ func main() {
 	}
 	userDataBytes, _ := json.Marshal(userData)
 
-	jwtString, err := gojwt.CreateToken(config, &gojwt.Claims{
+	jwtString, err := jwtInstance.Create(&gojwt.Claims{
 		JwtId: tokenID,
 		Data:  userDataBytes,
 	})
@@ -110,7 +110,7 @@ func main() {
 
 	// 3. Parse and validate the token
 	fmt.Println("Parsing and validating the token...")
-	parsedToken, validationMessage, err := gojwt.ParseToken(config, jwtString)
+	parsedToken, validationMessage, err := jwtInstance.Parse(jwtString)
 	if err != nil {
 		log.Fatalf("Error parsing JWT: %s - %v", validationMessage, err)
 	}
@@ -122,7 +122,7 @@ func main() {
 
 	// Example of an invalid token (e.g., expired)
 	fmt.Println("\nDemonstrating an expired token (will fail validation):")
-	expiredJwtConfig, _ := gojwt.NewToken(&gojwt.Config{
+	expiredJwtInstance, _ := gojwt.NewToken(&gojwt.Config{
 		Headers: &gojwt.Headers{
 			Type:               gojwt.EnumTokenTypeJWT,
 			SignatureAlgorithm: gojwt.EnumTokenSignatureAlgorithmHS256,
@@ -135,7 +135,7 @@ func main() {
 		Key:              "your-256-bit-secret-key-that-is-at-least-32-bytes-long",
 	})
 
-	expiredJwtString, _ := gojwt.CreateToken(expiredJwtConfig, &gojwt.Claims{
+	expiredJwtString, _ := expiredJwtInstance.Create(&gojwt.Claims{
 		JwtId: "expired-token-id",
 		Data:  []byte("expired data"),
 	})
@@ -143,7 +143,7 @@ func main() {
 	fmt.Printf("Waiting for 2 seconds to ensure token expires...\n")
 	time.Sleep(2 * time.Second) // Wait for the token to expire
 
-	_, expiredValidationMessage, expiredErr := gojwt.ParseToken(expiredJwtConfig, expiredJwtString)
+	_, expiredValidationMessage, expiredErr := expiredJwtInstance.Parse(expiredJwtString)
 	if expiredErr != nil {
 		fmt.Printf("Expected error for expired token: %s - %v\n", expiredValidationMessage, expiredErr)
 	} else {
@@ -168,7 +168,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/dmalix/gojwt"
+	"github.com/dmalix/gojwt/gojwt"
 )
 
 type MyCustomClaims struct {
@@ -178,7 +178,7 @@ type MyCustomClaims struct {
 }
 
 func main() {
-	config, err := gojwt.NewToken(&gojwt.Config{
+	jwtInstance, err := gojwt.NewToken(&gojwt.Config{
 		Headers: &gojwt.Headers{
 			Type:               gojwt.EnumTokenTypeJWT,
 			SignatureAlgorithm: gojwt.EnumTokenSignatureAlgorithmHS256,
@@ -191,7 +191,7 @@ func main() {
 		Key:              "super-secret-key-for-custom-claims-example-12345",
 	})
 	if err != nil {
-		log.Fatalf("Error creating JWT config: %v", err)
+		log.Fatalf("Error creating JWT instance: %v", err)
 	}
 
 	// Serialize custom claims
@@ -202,7 +202,7 @@ func main() {
 	}
 	dataBytes, _ := json.Marshal(customClaims)
 
-	jwtString, err := gojwt.CreateToken(config, &gojwt.Claims{
+	jwtString, err := jwtInstance.Create(&gojwt.Claims{
 		JwtId: "session-abc-123",
 		Data:  dataBytes,
 	})
@@ -212,7 +212,7 @@ func main() {
 	fmt.Printf("JWT with Custom Claims: %s\n\n", jwtString)
 
 	// Parse and deserialize custom claims
-	parsedToken, validationMessage, err := gojwt.ParseToken(config, jwtString)
+	parsedToken, validationMessage, err := jwtInstance.Parse(jwtString)
 	if err != nil {
 		log.Fatalf("Error parsing JWT with custom claims: %s - %v", validationMessage, err)
 	}
@@ -235,12 +235,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/dmalix/gojwt"
+	"github.com/dmalix/gojwt/gojwt"
 )
 
 func main() {
-	// Configure JWT config with strict parsing options
-	config, err := gojwt.NewToken(&gojwt.Config{
+	// Configure JWT instance with strict parsing options
+	jwtInstance, err := gojwt.NewToken(&gojwt.Config{
 		Headers: &gojwt.Headers{
 			Type:               gojwt.EnumTokenTypeJWT,
 			SignatureAlgorithm: gojwt.EnumTokenSignatureAlgorithmHS256,
@@ -260,11 +260,11 @@ func main() {
 		Key:              "a-very-secure-key-for-validation-options-example",
 	})
 	if err != nil {
-		log.Fatalf("Error creating JWT config: %v", err)
+		log.Fatalf("Error creating JWT instance: %v", err)
 	}
 
 	// Create a token that satisfies all required claims
-	validJwtString, err := gojwt.CreateToken(config, &gojwt.Claims{
+	validJwtString, err := jwtInstance.Create(&gojwt.Claims{
 		JwtId: "transaction-001",
 		Data:  []byte("{\"amount\": 100.00}"),
 	})
@@ -274,7 +274,7 @@ func main() {
 	fmt.Printf("Valid JWT: %s\n", validJwtString)
 
 	// Attempt to parse the valid token
-	_, validationMessage, err := gojwt.ParseToken(config, validJwtString)
+	_, validationMessage, err := jwtInstance.Parse(validJwtString)
 	if err != nil {
 		log.Fatalf("Error parsing valid JWT: %s - %v", validationMessage, err)
 	}
@@ -283,7 +283,7 @@ func main() {
 	// --- Demonstrate a token that will fail validation ---
 
 	// Create a token missing a required claim (e.g., JwtId)
-	invalidJwtString, err := gojwt.CreateToken(config, &gojwt.Claims{
+	invalidJwtString, err := jwtInstance.Create(&gojwt.Claims{
 		// JwtId is intentionally omitted here
 		Data: []byte("{\"operation\": \"read\"}"),
 	})
@@ -293,7 +293,7 @@ func main() {
 	fmt.Printf("\nInvalid JWT (missing JwtId): %s\n", invalidJwtString)
 
 	// Attempt to parse the invalid token
-	_, invalidValidationMessage, invalidErr := gojwt.ParseToken(config, invalidJwtString)
+	_, invalidValidationMessage, invalidErr := jwtInstance.Parse(invalidJwtString)
 	if invalidErr != nil {
 		fmt.Printf("Expected error for invalid JWT: %s - %v\n", invalidValidationMessage, invalidErr)
 	} else {

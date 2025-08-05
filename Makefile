@@ -8,3 +8,14 @@ check:
 	go vet ./...
 	go test ./...
 
+dependencies-init:
+	rm --dir --recursive --force vendor
+	rm --force go.mod
+	rm --force go.sum
+	go mod init github.com/dmalix/gojwt
+	go mod tidy
+	go mod vendor
+
+dependencies-update:
+	go mod tidy
+	go mod vendor

@@ -6,10 +6,10 @@ import (
 	"time"
 )
 
-func CreateToken(config *Config, claims *Claims, headers ...*Headers) (string, error) {
+func (receiver *resources) Create(claims *Claims, headers ...*Headers) (string, error) {
 
 	// Init Headers
-	configHeaders := config.Headers
+	configHeaders := receiver.config.Headers
 	if len(headers) != 0 {
 		if configHeaders != nil {
 			if headers[0].Type != "" {
@@ -44,31 +44,31 @@ func CreateToken(config *Config, claims *Claims, headers ...*Headers) (string, e
 	// Init Claims
 	if claims != nil {
 		if claims.Issuer == "" {
-			claims.Issuer = config.Claims.Issuer
+			claims.Issuer = receiver.config.Claims.Issuer
 		}
 		if claims.Subject == "" {
-			claims.Subject = config.Claims.Subject
+			claims.Subject = receiver.config.Claims.Subject
 		}
 		if claims.Audience == "" {
-			claims.Audience = config.Claims.Audience
+			claims.Audience = receiver.config.Claims.Audience
 		}
 		if claims.ExpirationTime == 0 {
-			claims.ExpirationTime = config.Claims.ExpirationTime
+			claims.ExpirationTime = receiver.config.Claims.ExpirationTime
 		}
 		if claims.NotBefore == 0 {
-			claims.NotBefore = config.Claims.NotBefore
+			claims.NotBefore = receiver.config.Claims.NotBefore
 		}
 		if claims.IssuedAt == 0 {
-			claims.IssuedAt = config.Claims.IssuedAt
+			claims.IssuedAt = receiver.config.Claims.IssuedAt
 		}
 		if claims.JwtId == "" {
-			claims.JwtId = config.Claims.JwtId
+			claims.JwtId = receiver.config.Claims.JwtId
 		}
 		if claims.Data == nil {
-			claims.Data = config.Claims.Data
+			claims.Data = receiver.config.Claims.Data
 		}
 	} else {
-		claims = config.Claims
+		claims = receiver.config.Claims
 	}
 	if claims == nil {
 		claims = &Claims{}
@@ -91,11 +91,11 @@ func CreateToken(config *Config, claims *Claims, headers ...*Headers) (string, e
 		}
 	}
 	if claims.ExpirationTime == 0 {
-		if config.TokenLifetimeSec == 0 {
-			return "", fmt.Errorf("claims.ExpirationTime or config.TokenLifetimeSec must be present")
+		if receiver.config.TokenLifetime == 0 {
+			return "", fmt.Errorf("claims.ExpirationTime or config.TokenLifetime must be present")
 		}
 		claims.ExpirationTime =
-			time.Unix(now, 0).Add(time.Second * time.Duration(config.TokenLifetimeSec)).UTC().Unix()
+			time.Unix(now, 0).Add(time.Second * time.Duration(receiver.config.TokenLifetime)).UTC().Unix()
 	}
 	claimsPart, err := createClaimsPart(claims)
 	if err != nil {
@@ -104,7 +104,7 @@ func CreateToken(config *Config, claims *Claims, headers ...*Headers) (string, e
 
 	// Signature
 	unsignedToken := headersPart + "." + claimsPart
-	signature, err := makeSignature(unsignedToken, configHeaders.SignatureAlgorithm, config.Key)
+	signature, err := makeSignature(unsignedToken, configHeaders.SignatureAlgorithm, receiver.config.Key)
 	if err != nil {
 		return "", fmt.Errorf("failed to make the signature: %s", err)
 	}

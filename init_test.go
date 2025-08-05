@@ -27,7 +27,7 @@ func TestJwt_SUCCESS(t *testing.T) {
 	const id = "id"
 	const dataset = "dataset"
 
-	config, err := NewToken(&Config{
+	jwtAccess, err := NewToken(&Config{
 		Headers: &Headers{
 			Type:               EnumTokenTypeJWT,
 			SignatureAlgorithm: EnumTokenSignatureAlgorithmHS512,
@@ -36,15 +36,15 @@ func TestJwt_SUCCESS(t *testing.T) {
 			Issuer:  "tester",
 			Subject: "Access",
 		},
-		ParseOptions:     ParseOptions{},
-		TokenLifetimeSec: 100,
-		Key:              "secret",
+		ParseOptions:  ParseOptions{},
+		TokenLifetime: 100,
+		Key:           "secret",
 	})
 	if err != nil {
 		t.Errorf("the function returned the error: %s", err)
 	}
 
-	jwt, err := CreateToken(config, &Claims{
+	jwt, err := jwtAccess.Create(&Claims{
 		JwtId: id,
 		Data:  []byte(dataset),
 	})
@@ -52,7 +52,7 @@ func TestJwt_SUCCESS(t *testing.T) {
 		t.Errorf("the function returned the error: %s", err)
 	}
 
-	token, codeError, err := ParseToken(config, jwt)
+	token, codeError, err := jwtAccess.Parse(jwt)
 	if err != nil {
 		t.Errorf("the function returned wrong error value: got '%v:%v' want '%v'", codeError, err, nil)
 	}
@@ -69,7 +69,7 @@ func TestJwt_SUCCESS(t *testing.T) {
 
 func TestJwt_FAIL(t *testing.T) {
 
-	config, err := NewToken(&Config{
+	jwtRefresh, err := NewToken(&Config{
 		Headers: &Headers{
 			Type:               EnumTokenTypeJWT,
 			SignatureAlgorithm: EnumTokenSignatureAlgorithmHS256,
@@ -87,14 +87,14 @@ func TestJwt_FAIL(t *testing.T) {
 			SkipClaimsValidation:      true,
 			SkipSignatureValidation:   true,
 		},
-		TokenLifetimeSec: 1,
-		Key:              "secret",
+		TokenLifetime: 1,
+		Key:           "secret",
 	})
 	if err != nil {
 		t.Errorf("the function returned the error: %s", err)
 	}
 
-	jwt, err := CreateToken(config, &Claims{
+	jwt, err := jwtRefresh.Create(&Claims{
 		JwtId: "id",
 		Data:  []byte("dataset"),
 	})
@@ -104,7 +104,7 @@ func TestJwt_FAIL(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 
-	_, codeError, err := ParseToken(config, jwt)
+	_, codeError, err := jwtRefresh.Parse(jwt)
 	if err == nil && codeError != EnumValidationMessageClaimsExpired {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v: %v'",
 			err, EnumErrorInvalidToken, EnumValidationMessageClaimsExpired)
@@ -115,14 +115,14 @@ func TestJwtParse_SUCCESS(t *testing.T) {
 
 	const jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ0ZXN0ZXIyIiwic3ViIjoiQWNjZXNzIiwiZXhwIjoyNjIzNTAzMzQ0LCJpYXQiOjE2MjM1MDMzNDMsImp0aSI6ImlkMiIsImRhdGEiOiJaR0YwWVhObGREST0ifQ.ilnH-Xqkf0EdgndVpCplOkTcTDeQLMZ5ivcmfzkq_fA"
 
-	config, err := NewToken(&Config{
+	jwtAccess, err := NewToken(&Config{
 		Key: "secret",
 	})
 	if err != nil {
 		t.Errorf("the function returned the error: %s", err)
 	}
 
-	_, _, err = ParseToken(config, jwt)
+	_, _, err = jwtAccess.Parse(jwt)
 	if err != nil {
 		t.Errorf("the function returned wrong error value: got '%v: %v' want '%v'",
 			err, EnumValidationMessageClaimsExpired, nil)
@@ -133,14 +133,14 @@ func TestJwtParse_FAIL1(t *testing.T) {
 
 	const jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ0ZXN0ZXIyIiwic3ViIjoiQWNjZXNzIiwiZXhwIjoyNjIzNTAzMzQ0LCJpYXQiOjE2MjM1MDMzNDMsImp0aSI6ImlkMiIsImRhdGEiOiJaR0YwWVhObGREST0ifQ.ilnH-Xqkf0EdgndVpCplOkTcTDeQLMZ5ivcmfzkq_fA"
 
-	config, err := NewToken(&Config{
+	jwtAccess, err := NewToken(&Config{
 		Key: "wrong_secret",
 	})
 	if err != nil {
 		t.Errorf("the function returned the error: %s", err)
 	}
 
-	_, codeError, err := ParseToken(config, jwt)
+	_, codeError, err := jwtAccess.Parse(jwt)
 	if err == nil && codeError != EnumValidationMessageClaimsExpired {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v: %v'",
 			err, EnumErrorInvalidToken, EnumValidationMessageClaimsExpired)
@@ -151,14 +151,14 @@ func TestJwtParse_FAIL2(t *testing.T) {
 
 	const jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ0ZXN0ZXIiLCJzdWIiOiJBY2Nlc3MiLCJleHAiOjE2MjM1MDM0NDMsImlhdCI6MTYyMzUwMzM0MywianRpIjoiaWQiLCJkYXRhIjoiWkdGMFlYTmxkREk9In0.1uslqn4e1Id3y84B_6zOBsA_E8a-9tXKnwXk2Wje14s"
 
-	config, err := NewToken(&Config{
+	jwtRefresh, err := NewToken(&Config{
 		Key: "secret",
 	})
 	if err != nil {
 		t.Errorf("the function returned the error: %s", err)
 	}
 
-	_, codeError, err := ParseToken(config, jwt)
+	_, codeError, err := jwtRefresh.Parse(jwt)
 	if err == nil && codeError != EnumValidationMessageClaimsExpired {
 		t.Errorf("the function returned wrong error value: got '%v' want '%v: %v'",
 			err, EnumErrorInvalidToken, EnumValidationMessageClaimsExpired)
