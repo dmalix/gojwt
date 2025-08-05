@@ -2,11 +2,10 @@ package gojwt
 
 import (
 	"fmt"
-	"html"
 	"time"
 )
 
-func (receiver *resources) Create(claims *Claims, headers ...*Headers) (string, error) {
+func (receiver *Jwt) Create(claims *Claims, headers ...*Headers) (string, error) {
 
 	// Init Headers
 	configHeaders := receiver.config.Headers
@@ -110,7 +109,5 @@ func (receiver *resources) Create(claims *Claims, headers ...*Headers) (string, 
 	}
 
 	// Return the JSON Web Token (JWT).
-	return html.UnescapeString(headersPart) +
-		"." + html.UnescapeString(claimsPart) +
-		"." + html.UnescapeString(signature), nil
+	return headersPart + "." + claimsPart + "." + signature, nil
 }
